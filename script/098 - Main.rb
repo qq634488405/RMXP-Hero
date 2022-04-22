@@ -23,7 +23,7 @@ end
 font_file=["/Font/wqx-16.ttf","/Font/wqx-12.ttf"]
 font_test=["Font/wqx-16.ttf","Font/wqx-12.ttf"]
 font_name=["WQX16","WQX12"]
-dll_name="RGSS103J"
+dll_name="Gmud"
 for i in 0..1
   # 字体未安装且存在字体文件则进行安装
   if not Font.exist?(font_name[i]) and FileTest.exist?(font_test[i])

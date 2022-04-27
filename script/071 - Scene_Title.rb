@@ -42,7 +42,7 @@ class Scene_Title
         $scene=Scene_Scroll.new(1)
       end
     else
-      print "数据库丢失，请重新安装游戏。"
+      print("数据库丢失，请重新安装游戏。")
       $scene = nil
     end
   end
@@ -60,7 +60,7 @@ class Scene_Title
       key = Zlib.crc32(data[i],key)
       unless crcs[i] == key
         file.close
-        print "数据库损坏，请重新安装！"
+        print("数据库损坏，请重新安装！")
         $scene = nil
       end
     end
@@ -98,7 +98,7 @@ class Scene_Title
       @cheat_mode=true if @password==$data_system.cheat_code
       return
     end
-    print $data_system.error_pas
+    print($data_system.error_pas)
     @next_step=false
   end
   #--------------------------------------------------------------------------
@@ -155,7 +155,7 @@ class Scene_Title
         file.close
         # 删除异常存档
         File.delete("Save/Gmud.sav")
-        p $data_system.error_save
+        print($data_system.error_save)
         $scene=Scene_Scroll.new(1)
       end
     end
@@ -181,6 +181,8 @@ class Scene_Title
     $game_player.straighten
     # 卸下所有装备
     $game_actor.unequip_all
+    $game_actor.check_item_bag
+    $game_actor.check_stone_list
     # 设置系统默认字体
     Font.default_name = (["WQX12","宋体","黑体","楷体"])
     # 设置铸造武器属性

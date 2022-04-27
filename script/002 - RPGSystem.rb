@@ -15,6 +15,7 @@ module RPG
     attr_accessor :falv_factor              # 法术等级系数
     attr_accessor :sword_hurt               # 铸剑毒伤
     attr_accessor :fire_hurt                # 法术火伤
+    attr_accessor :thunder_hurt             # 法术雷伤
     attr_accessor :levels                   # 等级描述
     attr_accessor :attack_lv                # 出手等级
     attr_accessor :school                   # 门派
@@ -82,6 +83,7 @@ module RPG
       super
       @sword_hurt = ""
       @fire_hurt = ""
+      @thunder_hurt = ""
       @levels = []
       @attack_lv = []
       @school = []

@@ -53,6 +53,8 @@ class Scene_Battle
     @spriteset = Spriteset_Battle.new(@enemy)
     # 初始化等待计数
     @wait_count = 0
+    # 初始化状态刷新标志
+    @actor_states_refresh,@enemy_states_refresh = false,false
     # 执行过渡
     if $data_system.battle_transition == ""
       Graphics.transition(20)
@@ -60,6 +62,8 @@ class Scene_Battle
       Graphics.transition(40, "Graphics/Transitions/" +
         $data_system.battle_transition)
     end
+    # 附加铸造武器状态
+    add_sword_state
     # 随机出手
     rand(100) > 50 ? start_phase1 : start_phase2
     # 主循环
@@ -200,6 +204,16 @@ class Scene_Battle
       @wait_count -= 1
       return
     end
+    # 刷新玩家战斗状态
+    if @actor_states_refresh
+      states_change(@actor)
+      @actor_states_refresh = false
+    end
+    # 刷新敌人战斗状态
+    if @enemy_states_refresh
+      states_change(@enemy)
+      @enemy_states_refresh = false
+    end
     # 分出胜负则返回
     return if judge
     # 回合分支
@@ -223,7 +237,7 @@ class Scene_Battle
     # 转移到回合 1
     @phase = 1
     # 玩家状态改变
-    states_change(@actor)
+    @actor_states_refresh = true
     # 激活选项窗口
     @battle_menu.bitmap.clear
     @battle_menu.visible = true

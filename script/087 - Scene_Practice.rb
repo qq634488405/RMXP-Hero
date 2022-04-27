@@ -11,20 +11,13 @@ class Scene_Practice
   def initialize
     @actor = $game_actor
     @list = @actor.practice_list
-    # 获取练功列表中最长的武功名字
-    @max_size = 0
-    @list.each do |i|
-      t_size = $data_kungfus[i].name.size/3
-      @max_size = t_size if t_size > @max_size
-    end
     @pra_list = []
     # 生成练功列表选项
     @list.each do |i|
       kf_name = $data_kungfus[i].name
-      t_size = kf_name.size / 3
-      name =  kf_name + "  "*(@max_size-t_size)
-      @pra_list.push(name)
+      @pra_list.push(kf_name)
     end
+    @pra_list.fill_space_to_max
   end
   #--------------------------------------------------------------------------
   # ● 主处理
@@ -36,7 +29,8 @@ class Scene_Practice
     @talk_window.visible,@talk_window.x = false,80
     @talk_window.y,@talk_window.z = 304,500
     # 生成练功窗口
-    @skill_window = Window_Command.new(@max_size*24+80,@pra_list,1,3)
+    max_size = @pra_list.max_length
+    @skill_window = Window_Command.new(max_size*8+80,@pra_list,1,3)
     @skill_window.x,@skill_window.y = 620-@skill_window.width,74
     # 生成进度条背景窗口
     @info = Window_Base.new(160,10,352,64)
@@ -70,9 +64,10 @@ class Scene_Practice
   #--------------------------------------------------------------------------
   # ● 描绘出错信息
   #--------------------------------------------------------------------------
-  def draw_error(text,time=40)
+  def draw_error(text,time=Graphics.frame_rate)
     @talk_window.auto_text(text.dup)
     @talk_window.visible = true
+    @actor.get_kf_efflv(kf_id)*10
     for i in 0..time
       # 刷新画面
       Graphics.update
@@ -103,13 +98,15 @@ class Scene_Practice
     @screen.update
   end
   #--------------------------------------------------------------------------
-  # ● 返回内力菜单
+  # ● 返回练功菜单
   #--------------------------------------------------------------------------
   def return_menu
     @skill_window.visible = true
     @skill_window.active = true
     @info.visible = false
     @talk_window.visible=false
+    # 恢复帧率
+    Graphics.frame_rate = 40
     @phase = 1
   end
   #--------------------------------------------------------------------------
@@ -163,6 +160,8 @@ class Scene_Practice
   # ● 刷新练功画面
   #--------------------------------------------------------------------------
   def update_practice
+    # 调整帧率
+    Graphics.frame_rate = 120
     lv = @actor.get_kf_level(kf_id)
     kf_pos = @actor.get_kf_index(kf_id)
     point_max = (lv + 1)**2
@@ -181,7 +180,7 @@ class Scene_Practice
       return
     end
     # 判断内力上限是否足够
-    if @actor.maxfp >= @actor.get_kf_efflv(kf_id)
+    if @actor.maxfp < @actor.get_kf_efflv(kf_id)*10
       draw_error($data_text.pra_no_fp)
       return_menu
       return

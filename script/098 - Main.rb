@@ -8,27 +8,27 @@ class Reset < Exception
 end
 # 检查文件
 unless FileTest.exist?("Lib/InputSupport.dll")
-  print "找不到InputSupport.dll，请尝试重新安装游戏！"
+  print("找不到InputSupport.dll，请尝试重新安装游戏！")
   exit
 end
 unless FileTest.exist?("Lib/Background.dll")
-  print "找不到Background.dll，请尝试重新安装游戏！"
+  print("找不到Background.dll，请尝试重新安装游戏！")
   exit
 end
 unless FileTest.exist?("Lib/NetworkSupport.dll")
-  print "找不到NetworkSupport.dll，请尝试重新安装游戏！"
+  print("找不到NetworkSupport.dll，请尝试重新安装游戏！")
   exit
 end
 # 安装临时字体
 font_file=["/Font/wqx-16.ttf","/Font/wqx-12.ttf"]
 font_test=["Font/wqx-16.ttf","Font/wqx-12.ttf"]
 font_name=["WQX16","WQX12"]
-dll_name="Gmud"
+dll_name="RGSS103J"
 for i in 0..1
   # 字体未安装且存在字体文件则进行安装
   if not Font.exist?(font_name[i]) and FileTest.exist?(font_test[i])
     m2w = Win32API.new("kernel32","MultiByteToWideChar","llplpl","l")
-    w2m= Win32API.new("kernel32","WideCharToMultiByte","llplplll","l")
+    w2m = Win32API.new("kernel32","WideCharToMultiByte","llplplll","l")
     effe = Win32API.new("gdi32","EnumFontFamiliesExA","lplll","v")
     wpm = Win32API.new("kernel32","WriteProcessMemory","lplll","l")
     dll = Win32API.new("kernel32","GetModuleHandle","p","l").call(dll_name)

@@ -12,8 +12,7 @@ class Scene_Event
     @npc_step = 1
     # 是否为拜访目标
     if $game_task.visit_id == @id
-      @talk_window.auto_text($data_text.i_know_text)
-      @talk_window.visible=true
+      show_text($data_text.i_know_text)
       # -1与村长回复去领赏
       $game_task.visit_id=-1
       @talk_step = 3
@@ -32,6 +31,8 @@ class Scene_Event
       talk = work_talk
     when 31 # 顾炎武
       talk = reward_talk
+    when 148 # 干匠
+      talk = sword_talk
     end
     talk = common_talk if talk == nil
     return if talk == nil
@@ -105,7 +106,7 @@ class Scene_Event
     else
       # 距离上次任务不足5分钟
       if time-$game_task.wanted_time<300
-        return $date_text.no_bad_text
+        return $data_text.no_bad_task
       else
         # 发布恶人任务
         return set_new_badman
@@ -153,6 +154,8 @@ class Scene_Event
         Graphics.update
       end
       talk = $game_task.finish_stone
+      # 播放奖励音效
+      $game_system.se_play($data_system.actor_collapse_se)
     end    
     return talk
   end

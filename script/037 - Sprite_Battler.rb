@@ -103,16 +103,6 @@ class Sprite_Battler < RPG::Sprite
         @battler.critical = false
         @battler.damage_pop = false
       end
-      # korapusu
-      if @battler.damage == nil and @battler.dead?
-        if @battler.is_a?(Game_Enemy)
-          $game_system.se_play($data_system.enemy_collapse_se)
-        else
-          $game_system.se_play($data_system.actor_collapse_se)
-        end
-        collapse
-        @battler_visible = false
-      end
     end
     # 设置活动块的坐标
     self.x = @battler.screen_x

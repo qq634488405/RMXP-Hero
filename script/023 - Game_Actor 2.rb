@@ -70,14 +70,14 @@ class Game_Actor < Game_Battler
     when 1 # 武器
       # 获取当前装备武器的背包位置
       old_id = get_item_index(2,@weapon_id,1)
-      # 如果存在已装备武器，则将其装备标志置为0
+      # 如果存在已装备其他武器，则将其装备标志置为0
       if old_id > -1 and old_id != id
         @item_bag[old_id][3] = 0
         @weapon_id = 0
       end
       # 更新装备标志
       @item_bag[id][3] = (@item_bag[id][3] + 1) % 2
-      @weapon_id = @item_bag[id][1] if @item_bag[id][3] == 1
+      @weapon_id = (@item_bag[id][3] == 1) ? @item_bag[id][1] : 0 
     when 2 # 装备
       # 获取新装备类型
       new_armor_id = @item_bag[id][1]
@@ -93,8 +93,9 @@ class Game_Actor < Game_Battler
       end
       # 更新装备标志
       @item_bag[id][3] = (@item_bag[id][3] + 1) % 2
-      set_armor += "=@item_bag[id][1]"
-      eval(set_armor) if @item_bag[id][3] == 1
+      set_new_armor = set_armor + "=@item_bag[id][1]"
+      clear_armor = set_armor + "=0"
+      @item_bag[id][3] == 1 ? eval(set_new_armor) : eval(clear_armor)
     end
   end
   #--------------------------------------------------------------------------
@@ -250,6 +251,29 @@ class Game_Actor < Game_Battler
       @dance = number
     when 15 # 铅球
       @ball = number
+    end
+  end
+  #--------------------------------------------------------------------------
+  # ● 检查背包
+  #--------------------------------------------------------------------------
+  def check_item_bag
+    return if @item_bag.empty?
+    @item_bag.each_index do |i|
+      if @item_bag[i][0] == 1 and @item_bag[i][1] == 19
+        @item_bag.delete_at(i)
+        break
+      end
+    end
+  end
+  #--------------------------------------------------------------------------
+  # ● 检查石板列表
+  #--------------------------------------------------------------------------
+  def check_stone_list
+    return if @stone_list.empty?
+    @stone_list.each do |i|
+      if not [48,59,81,95,102,111].include?(i)
+        @stone_list.delete(i)
+      end
     end
   end
 end

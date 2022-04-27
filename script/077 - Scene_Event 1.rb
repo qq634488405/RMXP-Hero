@@ -219,8 +219,6 @@ class Scene_Event
         # 随机生成钓鱼结果
         if rand(100)<50
           @fish_step=1
-          # 播放奖励音效
-          $game_system.se_play($data_system.actor_collapse_se)
         else
           @fish_step=2
         end

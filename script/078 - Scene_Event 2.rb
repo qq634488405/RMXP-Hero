@@ -80,13 +80,11 @@ class Scene_Event
   def update_fish
     # 按下 B 键的情况或按下 C 键的情况
     if Input.trigger?(Input::B) or Input.trigger?(Input::C)
-      # 演奏确定 SE
-      $game_system.se_play($data_system.decision_se)
       case @fish_step
       when 1 # 上钩的情况
         show_text($data_text.fish_suc[0])
         # 没带鱼篓
-        if $game_actor.have_item?(18)
+        if @actor.item_number(1,18) == 0
           @fish_step=3
         else
           @fish_step=4
@@ -99,8 +97,10 @@ class Scene_Event
         show_text($data_text.fish_no_item[1])
         @phase=1
       when 4 # 成功钓鱼
+        # 播放奖励音效
+        $game_system.se_play($data_system.actor_collapse_se)
         show_text($data_text.fish_suc[1])
-        $game_party.gain_item(17)
+        @actor.gain_item(1,17)
         @phase=1
       end
     end
@@ -310,7 +310,7 @@ class Scene_Event
       case @confirm_window.index
       when 0 # 给予物品完成任务
         item=[$game_task.find_type,$game_task.find_id]
-        @actor.lose_item(item,1)
+        @actor.lose_item(item[0],item[1],1)
         @confirm_window.visible=false
         @confirm_window.active=false
         $game_task.find_type=0

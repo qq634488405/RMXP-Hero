@@ -119,7 +119,7 @@ class Scene_FP
   #--------------------------------------------------------------------------
   # ● 描绘出错信息
   #--------------------------------------------------------------------------
-  def draw_error(text,time=40)
+  def draw_error(text,time=Graphics.frame_rate)
     @talk_window.auto_text(text.dup)
     @talk_window.visible = true
     for i in 0..time
@@ -138,6 +138,8 @@ class Scene_FP
       return_fp_menu
       return
     end
+    # 调整帧率
+    Graphics.frame_rate = 120
     # 计算打坐速率
     speed = @actor.fp_kf_lv/10+@actor.bon/5
     # 内力增加
@@ -301,6 +303,8 @@ class Scene_FP
     @fp_menu.active = true
     @info.visible = false
     @talk_window.visible=false
+    # 恢复帧率
+    Graphics.frame_rate = 40
     @phase = 1
   end
 end

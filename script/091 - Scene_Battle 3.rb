@@ -11,8 +11,8 @@ class Scene_Battle
   def start_phase2
     # 转移到回合 2
     @phase = 2
-    # 玩家状态改变
-    states_change(@enemy)
+    # 敌人状态改变
+    @enemy_states_refresh = true
   end
   #--------------------------------------------------------------------------
   # ● 刷新画面 (NPC命令回合)
@@ -62,6 +62,9 @@ class Scene_Battle
       target.hp = [target.hp - damage, 0].max
       target.maxhp = [target.maxhp - hurt_num, 0].max
       text = get_hit_text(damage,hit_type,hurt_num,target)
+      # 应用吸血大法效果
+      xi_lv = user.get_kf_level(56)
+      user.hp = [user.hp+xi_lv*damage/100,user.maxhp].min
       @msg_window.auto_text(text)
       @msg_window.visible = true
       # 播放击中动画
@@ -140,6 +143,25 @@ class Scene_Battle
       return 6
     else
       return 7
+    end
+  end
+  #--------------------------------------------------------------------------
+  # ● 获取法术伤害文本ID
+  #--------------------------------------------------------------------------
+  def magic_index(damage)
+    case damage
+    when 0...10
+      return 0
+    when 10...20
+      return 1
+    when 20...40
+      return 2
+    when 40...80
+      return 3
+    when 80...160
+      return 4
+    else
+      return 5
     end
   end
   #--------------------------------------------------------------------------
@@ -362,10 +384,14 @@ class Scene_Battle
       unless all_item.empty?
         all_item.each do |i|
           # 如果是三角石板，该掌门已获得则跳过
-          if i[0]==1 and i[1].abs==19 and @actor.stone_list.include?(@enemy.id)
-            next
-          else
-            @actor.stone_list.push(@enemy.id)
+          if i[0]==1 and i[1].abs==19
+            if @actor.stone_list.include?(@enemy.id)
+              next
+            else
+              @actor.stone_list.push(@enemy.id)
+              item_name += $data_items[19].name + " "
+              next
+            end
           end
           # 获得物品
           @actor.gain_item(i[0],i[1].abs) if @actor.can_get_item?(i[0],i[1].abs)

@@ -18,7 +18,9 @@ class Scene_Fly
   def main
     # 生成命令窗口
     @screen = Spriteset_Map.new
-    @fly_menu = Window_Command.new(96,$data_system.fly_menu,1,1)
+    list = $data_system.fly_menu.deep_clone.fill_space_to_max
+    @fly_menu = Window_Command.new(144,list,1,1)
+    @fly_menu.x,@fly_menu.y = 20,10
     @fly_menu.visible,@fly_menu.active = false,false
     # 生成对话窗口
     @talk_window = Window_Help.new(480,160)
@@ -26,11 +28,11 @@ class Scene_Fly
     @talk_window.auto_text(text)
     @talk_window.visible = false
     @talk_window.x,@talk_window.y = 80,304
-    @can_fly = (@actor.fp >= 200)
+    @can_fly = ()
     # 执行过渡
     Graphics.transition
     # 根据标志显示对应界面
-    if @can_fly
+    if @actor.fp >= 200
       @fly_menu.active,@fly_menu.visible = true,true
     else
       @talk_window.visible = true
@@ -52,6 +54,7 @@ class Scene_Fly
     Graphics.freeze
     # 释放窗口
     @fly_menu.dispose
+    @talk_window.dispose
     @screen.dispose
   end
   #--------------------------------------------------------------------------
@@ -61,10 +64,10 @@ class Scene_Fly
     # 刷新窗口
     @fly_menu.update
     @talk_window.update
-    if @can_fly # 满足内力条件刷新命令窗口
+    if @fly_menu.visible # 满足内力条件刷新命令窗口
       update_command
       return
-    else # 不满足刷新文本
+    elsif @talk_window.visible # 不满足刷新文本
       update_text
     end
     @screen.update
@@ -106,6 +109,7 @@ class Scene_Fly
       when 8 # 向上
         $game_player.turn_up
       end
+      $game_player.straighten
       # 刷新主角
       $game_player.refresh
       # 切换地图场景

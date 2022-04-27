@@ -167,11 +167,11 @@ class Scene_Study
   #--------------------------------------------------------------------------
   # ● 描绘出错信息
   #--------------------------------------------------------------------------
-  def draw_error(text)
+  def draw_error(text,time=Graphics.frame_rate)
     @talk_window.auto_text(text.dup)
     @talk_window.visible=true
     # 显示延时
-    for i in 1..40
+    for i in 1..time
       # 刷新画面
       Graphics.update
     end
@@ -193,6 +193,8 @@ class Scene_Study
   # ● 学习技能
   #--------------------------------------------------------------------------
   def study(id)
+    # 调整速度
+    Graphics.frame_rate = 120
     now_lv = @actor.skill_list[id][1]
     kf_id = @actor.skill_list[id][0]
     point_max = (now_lv+1)**2
@@ -272,11 +274,11 @@ class Scene_Study
     @learn.contents.clear
     # 边框
     @learn.contents.fill_rect(5,9,200,1,color)
-    @learn.contents.fill_rect(5,19,200,1,color)
-    @learn.contents.fill_rect(5,9,1,10,color)
-    @learn.contents.fill_rect(205,9,1,11,color)
+    @learn.contents.fill_rect(5,24,200,1,color)
+    @learn.contents.fill_rect(5,9,1,15,color)
+    @learn.contents.fill_rect(205,9,1,16,color)
     # 进度条
-    @learn.contents.fill_rect(5,9,process,10,color)
+    @learn.contents.fill_rect(5,9,process,15,color)
     # 点数/等级
     @learn.contents.draw_text(216,0,@learn.width-248,32,text)
   end
@@ -290,7 +292,9 @@ class Scene_Study
     @learn.visible = false
     @top_window.visible = true if @top_window != nil
     @confirm_window.visible = false
-    @confirm_window.index=0
+    @confirm_window.index = 0
+    # 恢复帧率
+    Graphics.frame_rate = 40
     @phase = 1
   end
 end

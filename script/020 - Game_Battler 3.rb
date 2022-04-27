@@ -7,169 +7,6 @@
 
 class Game_Battler
   #--------------------------------------------------------------------------
-  # ● 获取内力消耗
-  #--------------------------------------------------------------------------
-  def get_fp_cost(skill_id)
-    n = $data_skills[skill_id].fp_cost
-    if [5,8,23,24].include?(skill_id)
-      case skill_id
-      when 5 # 柳浪闻莺
-        n = get_kf_efflv(18) < 120 ? 200 : 400
-      when 8 # 流星飞掷
-        n = get_kf_efflv(24) < 150 ? 550 : 850
-      when 23 # 雪花六出
-        n = [250 + (get_kf_efflv(39)-90)/30*150,600].min
-      when 24 # 冰心诀
-        n = get_kf_efflv(41) < 90 ? 150 : 250
-      end
-    end
-    return n
-  end
-  #--------------------------------------------------------------------------
-  # ● 获取法力消耗
-  #--------------------------------------------------------------------------
-  def get_mp_cost(skill_id)
-    return 0 if skill_id < 29
-    n = $data_skills[skill_id].mp_cost
-    return n if n > 0
-    base_mp_cost = $data_skills[skill_id].magic_data[0]
-    return (@mp_plus + base_mp_cost)
-  end
-  #--------------------------------------------------------------------------
-  # ● 可以使用特技的判定
-  #     skill_id : 特技 ID
-  #--------------------------------------------------------------------------
-  def skill_can_use?(skill_id,aim)
-    # 获取绝招数据
-    sp_skill = $data_skills[skill_id]
-    # 检查自身是否呆若木鸡
-    unless movable?
-      text = $data_text.self_is_busy.dup
-      return [false,text]
-    end
-    # 检查目标是否呆若木鸡且绝招为控制型
-    if (not aim.movable? and sp_skill.type == 1)
-      # 使用暴风雪
-      if skill_id == 39
-        text = $data_text.aim_is_busy2.dup
-      else
-        text = $data_text.aim_is_busy.dup
-      end
-      text.gsub!("target",aim.name)
-      return [false,text]
-    end
-    result = [true]
-    unless sp_skill.require.empty?
-      # 判断使用要求
-      sp_skill.require.each do |i|
-        result = check_skill_require(skill_id,i[0],i[1])
-        unless result[0]
-          break
-        end
-      end
-    end
-    return result if not result[0]
-    # 检查法术
-    if skill_id > 28
-      # 检查法术数据
-      result = check_magic_require(skill_id,sp_skill.magic_data)
-      return result if not result[0]
-    end
-    check_list = @cool_down.deep_clone & @states.deep_clone
-    # 检查绝招冲突
-    unless sp_skill.crash_skill.empty?
-      # 冲突绝招处于冷却或持续则不可使用
-      sp_skill.crash_skill.each do |i|
-        if check_list.include?(i)
-          text = $data_text.sp_used.dup
-          text.gsub!("sp_skill",$data_skills[i].name)
-          result = [false,text]
-          break
-        end
-      end
-      return result if not result[0]
-    end
-    # 使用的绝招处于冷却时间
-    if @cool_down.include?(skill_id)
-      # 使用目标为自身的则显示已经在使用
-      if sp_skill.target == 0
-        text = $data_text.sp_used.dup
-      else
-        text = $data_text.sp_is_cd
-      end
-      text.gsub!("sp_skill",$data_skills[skill_id].name)
-      result = [false,text]
-    end
-    return result
-  end
-  #--------------------------------------------------------------------------
-  # ● 应用通常攻击效果
-  #     target : 攻击目标 (battler)
-  #--------------------------------------------------------------------------
-  def attack_effect(target)
-    hurt_num = 0
-    # 清除会心一击标志
-    self.critical = false
-    # 命中参数
-    hit_para = kf_power(0)
-    # 闪避参数
-    eva_para = target.kf_power(1)
-    eva_para /= 3 if not target.movable?
-    # 第一命中判定
-    hit_result = (Integer(rand(hit_para+eva_para)) >= eva_para)
-    # 第一命中的判定成功的情况
-    if hit_result == true
-      # 招架参数
-      parry_para = target.kf_power(2)
-      parry_para /= 3 if not target.movable?
-      # 第二命中判定
-      hit_result = (Integer(rand(hit_para+parry_para)) >= parry_para)
-      # 第二命中判定成功
-      if hit_result == true
-        # 判断影分身，大于分身格挡率则命中
-        if rand(100) > target.fenshen
-          # 计算基础伤害
-          damage1 = (Integer(rand(self.atk))+self.atk)/2
-          damage1 = damage1 + damage1 * @kf_damage/100
-          # 内力加成
-          fp_add = [self.fp,self.fp_plus].min
-          # 内力消耗
-          self.fp -= fp_add
-          if fp_add == 0 # 加力或内力任意为0无加成
-            damage2 = self.str+self.str*@kf_force/100
-          else
-            fp_add /= 6 if self.weapon_id > 0
-            fp_add += ([self.fp,3000].min/20 - target.fp_plus/25)
-            # 加成小于对方加力/25则无加成
-            if fp_add <= 0
-              damage2 = self.str
-            else
-              damage2 = self.str + fp_add
-              damage2 = damage2 + damage2 * @kf_force/100
-            end
-          end
-          self.damage = damage1 + (Integer(rand(damage2))+damage2)/2
-          # 判断是否受伤
-          if Integer(rand(self.damage)) > target.pdef
-            hurt_num = self.damage - target.pdef
-            # 没装备武器概率受伤
-            if self.weapon_id == 0
-              hurt_num = 0 if rand(4) != 0
-            end
-          end
-        else # 影分身格挡
-          self.damage = "Miss.3"
-        end
-      else # 招架格挡
-        self.damage = "Miss.2"
-      end
-    else # 轻功闪避
-      self.damage = "Miss.1"
-    end
-    # 过程结束
-    return [self.damage,@hit_type,hurt_num]
-  end
-  #--------------------------------------------------------------------------
   # ● 应用特技效果
   #     target  : 特技的目标 (battler)
   #     id      : 特技ID
@@ -401,7 +238,7 @@ class Game_Battler
       return [0,text]
     when 18 # 阴阳诀
       # 目标呆若木鸡，或rand(5)=0施展阳诀
-      if (not target.movable or rand(5) == 0)
+      if (not target.movable? or rand(5) == 0)
         @hit_plus += 15
         @str_plus += get_kf_efflv(32)/5
         add_state(18,1)
@@ -443,8 +280,8 @@ class Game_Battler
       turns = get_kf_efflv(33)/30 + 3
       @hit_plus += 10
       @eva_plus += get_kf_efflv(33)/15
-      add_stste(20,turns)
-      add_cd_times(20,turns)
+      add_state(20,turns)
+      add_cd_time(20,turns)
       @states_add[20] = [[1,10],[2,get_kf_efflv(33)/15]]
       return [0]
     when 21 # 三环套月
@@ -527,6 +364,89 @@ class Game_Battler
       add_cd_time(28,turns)
       @states_add[28] = [[5,addition_str],[4,addition_def]]
       return [0]
+    when 29,30,31,33,34,37,38 # 闪光弹/雷火弹/掌心雷/火焰球/烈焰球/寒冰弹/雾棱镖
+      if id == 31 # 掌心雷自身呆若木鸡1回合
+        add_state(0,1)
+      end
+      # 获取法术数据
+      m_data = sp_skill.magic_data
+      m_hit,m_damage = m_data[2],m_data[3]
+      m_type,damage_type,buff_type = m_data[4],m_data[5],m_data[6]
+      buff_hit,buff_eff,buff_turns = m_data[7],m_data[8],m_data[9]
+      # 法术使用判定
+      if rand(100) >= magic_hit(target,m_hit)
+        # 法术命中，判定命中目标
+        m_damage = [[m_damage,20].max,200].min
+        user_damage = (rand(@maxhp) + [@mp,@maxmp*2].min) / 20
+        target_damage = (rand(target.maxhp) + target.fp) / 20
+        user_damage += m_damage * 2 / 100 * @mp_plus
+        target_damage += m_damage * 2 / 100 * Integer(rand(target.fp_plus))
+        # 命中对手
+        if user_damage >= target_damage
+          damage1 = (user_damage-target_damage)*m_damage/100
+          damage_aim = 1
+          text = ["damage"]
+          # 附加状态判定
+          state_text = add_magic_state(target,buff_type,buff_hit,buff_eff,buff_turns)
+          text.push(state_text) if state_text != ""
+        else # 反弹
+          damage1 = (target_damage-user_damage+target.fp_plus)*m_damage/100
+          damage_aim = 2
+          text = [sp_skill.equal_text[0].deep_clone,"damage"]
+        end
+        damage2 = damage1 * mp_kf_lv / 200
+        self.damage = (damage1+damage2)*2
+        return [2,damage_aim,damage_type,self.damage,text]
+      else # 法术失败
+        text = [sp_skill.fail_text[0].deep_clone]
+        self.damage = "Miss"
+        # 闪光弹/掌心雷/火焰弹失败也可附加状态
+        if [29,31,33].include?(id)
+          state_text = add_magic_state(target,buff_type,buff_hit,buff_eff,buff_turns)
+          text.push(state_text) if state_text != ""
+        end
+        return [2,0,damage_type,self.damage,text]
+      end
+    when 35 # 三昧火
+      # 获取法术数据
+      m_hit = sp_skill.magic_data[2]
+      # 法术成功判定
+      if rand(100) >= magic_hit(target,m_hit)
+        self.damage = mp_kf_lv
+        add_state(0,2)
+        # 目标是NPC则清空物品
+        if target.is_a?(Game_Enemy)
+          target.clear_item
+        end
+        # 25%附加灼烧状态
+        if rand(100) < 25
+          target.add_state(-2,2)
+        end
+        text = sp_skill.success_text[0].deep_clone
+      else # 未命中
+        add_state(0,5)
+        self.damage = "Miss"
+        text = sp_skill.fail_text[0].deep_clone
+      end
+      return [0,text]
+    when 39 # 暴风雪
+      # 经验判定
+      hit1 = (rand(mp_kf_lv**3+@exp+target.exp)>=target.exp)
+      # 内力上限判定
+      hit2 = (rand(@maxmp+target.maxfp)>=target.maxfp)
+      # 内力判定
+      hit3 = (rand(@mp+target.fp)>=target.fp)
+      if hit1 and hit2 and hit3
+        turns = rand(15) + 5
+        target.add_state(0,turns)
+        text = sp_skill.success_text[0].deep_clone
+      else
+        self.damage = "Miss"
+        turns = rand(2) + 1
+        add_state(0,turns)
+        text = sp_skill.fail_text[0].deep_clone
+      end
+      return [0,text]
     end
   end
 end

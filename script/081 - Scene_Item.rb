@@ -28,11 +28,11 @@ class Scene_Item
     # 生成对话窗口
     @talk_window = Window_Help.new(480,160)
     @talk_window.visible=false
-    @talk_window.x=80
-    @talk_window.y=304
+    @talk_window.x,@talk_window.y = 80,304
+    @talk_window.z = @help_window.z + 100
     # 生成选择窗口
-    @confirm_window=Window_Command.new(480,$data_system.confirm_choice,2,3)
-    @confirm_window.y,@confirm_window.z = 416,800
+    @confirm_window=Window_Command.new(240,$data_system.confirm_choice,2,3)
+    @confirm_window.x,@confirm_window.y,@confirm_window.z = 200,416,800
     @confirm_window.visible=false
     @category_window.active=true
     # 执行过度
@@ -193,7 +193,7 @@ class Scene_Item
         # 演奏取消 SE
         $game_system.se_play($data_system.cancel_se)
         # 切换到分类
-        return_category
+        return_item
         return
       end
       # 按下 C 键的情况下
@@ -208,11 +208,11 @@ class Scene_Item
             @ask_step = 2
           when 2 # 性别变更
             @actor.gender = 2
-            return_category
+            return_item
           end
           return
         when 1 # 放弃
-          return_category
+          return_item
           return
         end
       end
@@ -236,6 +236,15 @@ class Scene_Item
     @help_window.visible=false
     @talk_window.visible=false
     @confirm_window.visible=false
+  end
+  #--------------------------------------------------------------------------
+  # ● 返回分类
+  #--------------------------------------------------------------------------
+  def return_item
+    @talk_window.visible=false
+    @confirm_window.active=false
+    @confirm_window.visible=false
+    @item_window.active=true
   end
   #--------------------------------------------------------------------------
   # ● 检查状态是否满
@@ -277,15 +286,14 @@ class Scene_Item
         # 演奏冻结 SE
         $game_system.se_play($data_system.buzzer_se)
         # 切换到分类
-        return_category
+        return_item
         return
       elsif @actor.gender == 0 # 男性
         text = $data_text.caihua_ask1.dup
-        @talk_window.auto_text(text)
-        @talk_window.visible = true
-        @item_window.active = false
+        draw_error(text)
         @confirm_window.visible = true
         @confirm_window.active = true
+        @confirm_window.index = 0
         @ask_step = 1
         return
       end
@@ -293,21 +301,23 @@ class Scene_Item
     # 读书识字等级为0
     if @actor.get_kf_level(11) == 0
       text = $data_text.no_int_text.dup
-      @item_window.active = false
-      @talk_window.auto_text(text)
-      @talk_window.visible = true
+      # 演奏冻结 SE
+      $game_system.se_play($data_system.buzzer_se)
+      draw_error(text)
+      show_delay
       return
     end
     # 门派非逍遥派且已有门派
     if @actor.class_id != 9 and @actor.class_id != 0
       text = $data_text.not_read_text.dup
-      @item_window.active = false
-      @talk_window.auto_text(text)
-      @talk_window.visible = true
+      # 演奏冻结 SE
+      $game_system.se_play($data_system.buzzer_se)
+      draw_error(text)
+      show_delay
       return
     end
     @actor.class_id = 9
-    $scene = Scene_Study(book_id,1)
+    $scene = Scene_Study.new(book_id,1)
   end
   #--------------------------------------------------------------------------
   # ● 丢弃物品
@@ -318,5 +328,24 @@ class Scene_Item
     bag_id = @item_window.bag_index
     flag = @actor.lose_bag_id(bag_id)
     return_category if flag
+  end
+  #--------------------------------------------------------------------------
+  # ● 描绘错误信息
+  #--------------------------------------------------------------------------
+  def draw_error(text)
+    @item_window.active = false
+    @talk_window.auto_text(text)
+    @talk_window.visible = true
+  end
+  #--------------------------------------------------------------------------
+  # ● 消息显示
+  #--------------------------------------------------------------------------
+  def show_delay
+    # 刷新画面
+    for i in 1..40
+      Graphics.update
+    end
+    @talk_window.visible = false
+    @item_window.active = true
   end
 end

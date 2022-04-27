@@ -13,21 +13,21 @@ class Game_Battler
     action_list = []
     case type
     when 0 # 攻击招式
-      kf_action = $data_kungfus[attack_kf_id].atk_word
+      kf_action = $data_kungfus[attack_kf_id].atk_word.deep_clone
       lv = get_kf_level(attack_kf_id)
       # 根据功夫等级生成招式列表
       kf_action.each do |i|
         action_list.push(i) if i[0] <= lv
       end
     when 1 # 轻功招式
-      action_list = $data_kungfus[dodge_kf_id].def_word
+      action_list = $data_kungfus[dodge_kf_id].def_word.deep_clone
     end
     # 获取随机招式
     id = Integer(rand(action_list.size))
     action = action_list[id]
     if type == 0
       # 设置临时属性
-      text,@hit_type = action[1].deep_clone,action[2]
+      text,@hit_type = action[1],action[2]
       @kf_ap,@kf_dp,@kf_pp = action[3],action[4],action[5]
       @kf_damage,@kf_force = action[6],action[7]
       return text
@@ -46,9 +46,9 @@ class Game_Battler
     return " " if [1,8,10,11].include?(kf_type)
     # 轻功获取def_word，其余获取atk_word
     if kf_type == 9
-      action_list = $data_kungfus[kf_id].def_word
+      action_list = $data_kungfus[kf_id].def_word.deep_clone
       # 如果act_id越界，则随机获取招式
-      if [0...action_list.size].include?(act_id)
+      if (0...action_list.size).include?(act_id)
         return action_list[act_id]
       else
         # 获取随机招式
@@ -56,14 +56,14 @@ class Game_Battler
         return action_list[id]
       end
     else
-      kf_action = $data_kungfus[kf_id].atk_word
+      kf_action = $data_kungfus[kf_id].atk_word.deep_clone
       # 根据功夫等级生成招式列表
       lv = get_kf_level(kf_id)
       kf_action.each do |i|
         action_list.push(i) if i[0] <= lv
       end
       # 如果act_id越界，则随机获取招式
-      if [0...action_list.size].include?(act_id)
+      if (0...action_list.size).include?(act_id)
         action = action_list[act_id]
       else
         # 获取随机招式
@@ -71,7 +71,7 @@ class Game_Battler
         action = action_list[id]
       end
       # 设置临时属性
-      text,@hit_type = action[1].deep_clone,action[2]
+      text,@hit_type = action[1],action[2]
       @kf_ap,@kf_dp,@kf_pp = action[3],action[4],action[5]
       @kf_damage,@kf_force = action[6],action[7]
       return text
@@ -104,7 +104,7 @@ class Game_Battler
   # ● 清除临时数据(战斗初始化)
   #--------------------------------------------------------------------------
   def clear_temp_data
-    @states,@states_add,@cool_down,@cd_turn = [],{},[],{}
+    @states,@states_add,@cool_down,@cd_turn,@damage = [],{},[],{},nil
     @states_turn,@str_plus,@dex_plus,@agi_plus = {},0,0,0
     @int_plus,@bon_plus,@hit_plus,@eva_plus,@atk_plus = 0,0,0,0,0
     @def_plus,@luc_plus,@kf_ap,@kf_dp,@kf_pp,@fenshen = 0,0,0,0,0,-1
@@ -274,11 +274,17 @@ class Game_Battler
   #     state_id : 状态 ID
   #     state_turn : 持续回合
   #--------------------------------------------------------------------------
-  def add_state(state_id,turns)
+  def add_state(state_id,turns,plus = 0)
     # 已有状态的情况下
     if state?(state_id)
-      # 更新持续时间
-      @states_turn[state_id] = turns
+      # 非增加回合的情况
+      if plus == 0
+        # 更新持续时间
+        @states_turn[state_id] = [turns,@states_turn[state_id]].max
+      else
+        # 增加持续时间
+        @states_turn[state_id] += turns
+      end
       return
     else
       # 新增状态及持续时间
@@ -361,11 +367,14 @@ class Game_Battler
   def remove_states_auto
     removed = []
     for i in @states_turn.keys.clone
+      # 铸造武器状态则跳过
+      next if [-4,-5].include?(i)
+      # 持续回合减一
       if @states_turn[i] > 0
         @states_turn[i] -= 1
         if @states_turn[i] == 0
           remove_state(i)
-          removed.push(i)
+          removed.push(i) if i > 0
         end
       end
     end

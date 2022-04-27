@@ -201,14 +201,16 @@ class Game_Task
     $game_temp.badman_place=@wanted_place
     @wanted_time = Graphics.frame_count/Graphics.frame_rate
     # 生成姓名
-    name1=rand(7)
-    name2=rand(7)
+    name1=rand(8)
+    name2=rand(8)
     gender= name2>3 ? 0 : 1
     @wanted_name=$data_text.bad_name1[name1]+$data_text.bad_name2[name2]
     # 更新恶人计数
     @wanted_count += 1
-    @wanted_turn += 1 if @wanted_count>10
-    @wanted_count %=10
+    if @wanted_count > 10
+      @wanted_turn += 1
+      @wanted_count = 1
+    end
     # 生成奖励数据
     @wanted_reward = (80 + rand(80))*(@wanted_count+@wanted_turn-1)
     # 生成恶人数据
@@ -236,9 +238,14 @@ class Game_Task
     @wanted_data.base_luc = @actor.base_luc
     @wanted_data.maxhp = @actor.maxhp*percent/100
     @wanted_data.maxfp = @actor.maxfp*percent/100
-    @wanted_data.maxmp = @actor.maxfp*percent/100 if class_id==8
+    if class_id == 8
+      @wanted_data.maxmp = @actor.maxfp*percent/100
+      @wanted_data.mp_plus = @wanted_data.maxmp/40
+    else
+      @wanted_data.maxmp = 0
+      @wanted_data.mp_plus = 0
+    end
     @wanted_data.fp_plus = @wanted_data.maxfp/40
-    @wanted_data.mp_plus = @wanted_data.maxmp/40 if class_id==8
     @wanted_data.hp = @wanted_data.maxhp
     @wanted_data.fp = @wanted_data.maxfp
     @wanted_data.mp = @wanted_data.maxmp
@@ -251,10 +258,9 @@ class Game_Task
     level = @actor.get_max_level*percent/100
     # 生成恶人技能列表，等级取玩家技能最高等级*轮次系数
     @wanted_data.skill_list = []
-    bad_data.each do |i|
+    bad_data[8].each do |i|
       @wanted_data.skill_list.push([i,level])
     end
-    p $data_enemies[198]
     # 生成恶人事件
     create_badman(index,gender)
   end
@@ -344,8 +350,10 @@ class Game_Task
     # 设定角色图
     if gender == 0
       character_name = "Bad_Man"
+      $data_enemies[198].battler_name = "NPC_Tile_11"
     else
       character_name = "Bad_Woman"
+      $data_enemies[198].battler_name = "NPC_Tile_03"
     end
     $game_temp.bad_man.pages[0].graphic.character_name=character_name
   end

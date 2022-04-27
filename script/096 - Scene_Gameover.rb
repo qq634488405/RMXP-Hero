@@ -23,7 +23,7 @@ class Scene_Gameover
     text = $data_text.die_msg.deep_clone
     text.each do |i|
       @die_window.update
-      @die_window.auto_text(i,@die_window.back_color)
+      @die_window.auto_text(i,0,@die_window.back_color)
       for j in 1..60
         # 刷新游戏画面
         Graphics.update

@@ -8,7 +8,7 @@ unless $_Start
   begin
     $_Start.call
   rescue RuntimeError
-    print "请安装VC运行库后再开始游戏。"
+    print("请安装VC运行库后再开始游戏。")
     $scene=nil
   end
   module Input

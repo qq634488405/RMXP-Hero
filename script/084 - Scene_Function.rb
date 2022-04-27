@@ -155,7 +155,7 @@ class Scene_Function
   #--------------------------------------------------------------------------
   def update_save
     # 按下 C 键的情况
-    if Input.trigger?(Input::C)
+    if Input.trigger?(Input::C) or Input.trigger?(Input::B)
       # 返回菜单
       $scene=Scene_Menu.new(3)
     end

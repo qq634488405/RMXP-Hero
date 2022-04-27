@@ -114,7 +114,7 @@ class Scene_MP
   #--------------------------------------------------------------------------
   # ● 描绘出错信息
   #--------------------------------------------------------------------------
-  def draw_error(text,time=40)
+  def draw_error(text,time=Graphics.frame_rate)
     @talk_window.auto_text(text.dup)
     @talk_window.visible = true
     for i in 0..time
@@ -133,6 +133,8 @@ class Scene_MP
       return_mp_menu
       return
     end
+    # 调整帧率
+    Graphics.frame_rate = 120
     # 计算冥思速率
     speed = @actor.mp_kf_lv/10 +@actor.bon/5
     # 法力增加
@@ -215,6 +217,8 @@ class Scene_MP
     @mp_menu.active = true
     @info.visible = false
     @talk_window.visible=false
+    # 恢复帧率
+    Graphics.frame_rate = 40
     @phase = 1
   end
 end

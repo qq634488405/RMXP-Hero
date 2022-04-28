@@ -49,8 +49,7 @@ class Scene_Study
       @list.push(command)
     end
     # 生成请教窗口
-    @skill_window = Window_Command.new(272,@list,1,3)
-    @skill_window.y,@skill_window.x = 64,8
+    @skill_window = Window_Command.new(272,@list,1,3,1,0,8,64,224)
     # 生成进度条背景窗口
     @learn = Window_Base.new(160,10,352,64)
     @learn.z = 600

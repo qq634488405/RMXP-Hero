@@ -76,6 +76,7 @@ module RPG
     attr_accessor :dance_bgm                # 跳舞BGM
     attr_accessor :throw_ball_bgm           # 投篮BGM
     attr_accessor :create_bgm               # 创建人物BGM
+    attr_accessor :move_se                  # 切换地图SE
     #--------------------------------------------------------------------------
     # ● 初始化对像
     #--------------------------------------------------------------------------
@@ -145,6 +146,7 @@ module RPG
       @dance_bgm = RPG::AudioFile.new
       @throw_ball_bgm = RPG::AudioFile.new
       @create_bgm = RPG::AudioFile.new
+      @move_se = RPG::AudioFile.new
     end
   end
 end

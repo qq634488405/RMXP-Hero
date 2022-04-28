@@ -22,10 +22,11 @@ class Window_Command < Window_Selectable
   #     commands : 命令字符串序列
   #     type     : 光标类型
   #--------------------------------------------------------------------------
-  def initialize(width,commands,column=1,type=0,align=1,index=0,x=0,y=0)
+  def initialize(width,commands,column=1,type=0,align=1,index=0,x=0,y=0,h=480)
     row = commands.size / column
+    maxh = h
     # 由命令的个数计算出窗口的宽和高
-    super(x, y, width,[row * 32 + 32,480 - y].min, type)
+    super(x, y, width,[row * 32 + 32,maxh].min, type)
     @item_max = commands.size
     @commands = commands
     @row = row

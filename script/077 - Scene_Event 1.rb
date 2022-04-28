@@ -21,6 +21,7 @@ class Scene_Event
   #           10--上吊
   #           11--喝酒
   #           12--联机
+  #           13--跳转地图，id--地图ID，number--入口ID
   #--------------------------------------------------------------------------
   def initialize(type,id=0,number=1)
     $eat_flag = true
@@ -62,7 +63,9 @@ class Scene_Event
     when 7 # 义工任务
       free_work
     when 8 # BOSS战斗
-      @confirm_window=Window_Command.new(480,$data_system.boss3_choice,1,3)
+      list = $data_system.boss3_choice.deep_clone
+      list.fill_space_to_max
+      @confirm_window=Window_Command.new(480,list,1,3)
       @confirm_window.y=384
       boss_fight
     when 9 # 通缉告示牌
@@ -77,6 +80,8 @@ class Scene_Event
       @confirm_window=Window_Command.new(320,$data_system.net_battle_choice,1,2)
       @confirm_window.y=304
       net_battle
+    when 13 # 跳转XX坛
+      move_to_tan
     end
     if @confirm_window == nil
       @confirm_window=Window_Command.new(240,$data_system.confirm_choice,2,3)
@@ -174,7 +179,7 @@ class Scene_Event
       x_offset,y_offset=32,-32-h/2
     end
     x=[[$game_player.screen_x+x_offset,376].min,0].max
-    y=[[$game_player.screen_y+y_offset,512].min,24].max
+    y=[[$game_player.screen_y+y_offset,616-h].min,24].max
     @npc_menu.x,@npc_menu.y=x,y
     @npc_name=Sprite_Text.new
     @npc_name.set_up(x,y-24,@npc.name)
@@ -374,5 +379,25 @@ class Scene_Event
   # ● 联机对战
   #--------------------------------------------------------------------------
   def net_battle
+  end
+  #--------------------------------------------------------------------------
+  # ● 移动至XX坛
+  #--------------------------------------------------------------------------
+  def move_to_tan
+    # 获取坐标
+    x_y = $data_tasks.tan_map_xy[@id]
+    x,y = x_y[@number][0],x_y[@number][1]
+    # 播放移动SE
+    $game_system.se_play($data_system.move_se)
+    $scene = Scene_Map.new
+    # 设置主角的移动目标
+    $game_map.setup(@id)
+    $game_player.moveto(x,y)
+    $game_map.autoplay
+    # 准备过渡
+    Graphics.freeze
+    # 设置过渡处理中标志
+    $game_temp.transition_processing = true
+    $game_temp.transition_name = ""
   end
 end

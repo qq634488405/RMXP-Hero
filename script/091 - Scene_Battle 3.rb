@@ -268,11 +268,12 @@ class Scene_Battle
     text = $data_text.kill_text.dup
     text.gsub!("actor",@actor.name)
     @msg_window.auto_text(text)
-    @msg_window.visible = true
+    @msg_window.visible = false
     # 生成确认窗口
     @confirm_window=Window_Command.new(240,$data_system.confirm_choice,2,3)
     @confirm_window.y,@confirm_window.z = @msg_window.height-24,800
     @confirm_window.x,@confirm_window.index = 200,0
+    @confirm_window.visible,@confirm_window.active = false,false
     @phase5_step = 1
   end
   #--------------------------------------------------------------------------
@@ -288,12 +289,16 @@ class Scene_Battle
       update_phase5_reward
     when 4
       update_phase5_end
+    when 5
+      update_phase5_tan
     end
   end
   #--------------------------------------------------------------------------
   # ● 画面更新 (确认杀头)
   #--------------------------------------------------------------------------
   def update_phase5_confirm
+    @msg_window.visible = true
+    @confirm_window.visible,@confirm_window.active = true,true
     @confirm_window.update
     # 按下 B 键的情况下
     if Input.trigger?(Input::B)
@@ -324,6 +329,13 @@ class Scene_Battle
           @phase5_step = 3
         # 如果是坛主
         elsif @enemy.id > 162 and @enemy.id < 171
+          # 更新杀人列表
+          @actor.kill_list.push(@enemy.id)
+          # 更新地图事件
+          $game_map.refresh_map_events
+          # 移除当前的坛地图
+          @actor.lose_item(1,20 + @actor.tan_id)
+          @phase5_step = 5
         # 其他NPC
         else
           # 更新杀人列表
@@ -410,6 +422,22 @@ class Scene_Battle
       # 生成战斗结果窗口
       @result_window = Window_BattleResult.new(gold, item_name)
       @phase5_step = 2
+    end
+  end
+  #--------------------------------------------------------------------------
+  # ● 画面更新 (XX坛任务奖励)
+  #--------------------------------------------------------------------------
+  def update_phase5_tan
+    # 按下 B 或 C 键的情况下
+    if Input.trigger?(Input::C) or Input.trigger?(Input::B)
+      @msg_window.visible = true
+      # 播放奖励音效
+      $game_system.se_play($data_system.actor_collapse_se)
+      if @actor.tan_id != 8
+        @phase5_step = 4
+      end
+      text = $game_task.give_tan_reward
+      @msg_window.auto_text(text)
     end
   end
 end

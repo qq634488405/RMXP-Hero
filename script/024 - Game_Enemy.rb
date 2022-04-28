@@ -66,11 +66,11 @@ class Game_Enemy < Game_Battler
   #--------------------------------------------------------------------------
   def item_list
     n = []
-    n.push([2,@weapon_id]) if @weapon_id>0
     n.push(@item1) if @item1[0]>0
     n.push(@item2) if @item2[0]>0
     n.push(@item3) if @item3[0]>0
     n.push(@item4) if @item4[0]>0
+    n.push([2,@weapon_id]) if @weapon_id>0
     return n
   end
   #--------------------------------------------------------------------------

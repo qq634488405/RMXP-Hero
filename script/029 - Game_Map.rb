@@ -134,8 +134,11 @@ class Game_Map
     # 设置地图事件数据
     @events = {}
     for i in @map.events.keys
-      # NPC被杀的情况，替换为骷髅头
+      # 普通NPC被杀的情况，替换为骷髅头，喽啰则消失
       if $game_actor.kill_list.include?(@map.events[i].name.to_i)
+        if (173..194).include?(@map.events[i].name.to_i)
+          next
+        end
         npc = $game_temp.dead_npc
         npc.id,npc.name = @map.events[i].id,@map.events[i].name
         npc.x,npc.y = @map.events[i].x,@map.events[i].y

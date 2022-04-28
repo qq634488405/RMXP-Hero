@@ -107,7 +107,7 @@ class Scene_Battle
       @num_window.dispose
     end
     if @confirm_window != nil
-      @result_window.dispose
+      @confirm_window.dispose
     end
     if @result_window != nil
       @result_window.dispose

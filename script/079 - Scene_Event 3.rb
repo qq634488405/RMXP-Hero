@@ -368,9 +368,9 @@ class Scene_Event
     $game_system.bgm_stop
     # 演奏战斗 BGM
     if $game_temp.boss_battle
-      bgm = $game_system.boss_bgm[id-195]
+      bgm = $data_system.boss_bgm[id-195]
     else
-      bgm = $game_system.battle_bgm
+      bgm = $data_system.battle_bgm
     end
     $game_system.bgm_play(bgm)
     $scene = Scene_Battle.new(id)

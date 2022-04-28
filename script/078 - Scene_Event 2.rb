@@ -373,6 +373,11 @@ class Scene_Event
       @npc_name.visible = false
     end
     show_text(@text_gp[@gp_id + 1])
+    # 道德和尚结局文本结束立即设置结束标志
+    if type == 1 and @boss_id == 2 and (@gp_id+2 == @text_gp.size)
+      @end_text_gp = true
+      return
+    end
     # 按下 B 键的情况或按下 C 键的情况
     if Input.trigger?(Input::B) or Input.trigger?(Input::C)
       # 设置@gp_id
@@ -424,6 +429,7 @@ class Scene_Event
         $game_temp.boss_battle = true
         call_battle(@npc.id)
       when 2 #道德和尚
+        @confirm_window.x = 80
         @confirm_window.active = true
         @confirm_window.visible = true
         @boss_select = true

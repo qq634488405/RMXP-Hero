@@ -329,6 +329,48 @@ class Game_Task
     return give_reward(@wanted_reward,@wanted_reward/4,-1)
   end
   #--------------------------------------------------------------------------
+  # ● 功夫提高等级
+  #--------------------------------------------------------------------------
+  def kf_level_up(lv)
+    @actor.skill_list.each_index do |i|
+      @actor.skill_list[i][1] = [@actor.skill_list[i][1]+lv,255].min
+    end
+  end
+  #--------------------------------------------------------------------------
+  # ● XX坛奖励
+  #--------------------------------------------------------------------------
+  def give_tan_reward
+    id = @actor.tan_id
+    text = $data_tasks.tan_reward[id].deep_clone
+    return $data_tasks.tan_finish.deep_clone if id == 9
+    case id
+    when 1 # 青龙坛
+      @actor.exp += 50000
+    when 2 # 地罡坛
+      @actor.exp += 50000
+      @actor.gain_gold(60000)
+    when 3 # 朱雀坛
+      @actor.maxfp += 150
+    when 4 
+      @actor.gain_gold(60000)
+      @actor.maxfp += 200
+    when 5
+      @actor.exp += 60000
+      @actor.maxfp += 200
+    when 6
+      kf_level_up(3)
+      @actor.gain_gold(60000)
+    when 7
+      kf_level_up(3)
+      @actor.exp += 60000
+    when 8
+      kf_level_up(3)
+      @actor.maxfp += 200
+    end
+    @actor.tan_id += 1
+    return text
+  end
+  #--------------------------------------------------------------------------
   # ● 生成恶人事件
   #--------------------------------------------------------------------------
   def create_badman(index,gender)

@@ -176,8 +176,8 @@ class Scene_Cheat
       $game_system.se_play($data_system.decision_se)
       case @status_index
       when 0,1,2,6,7,13,14,15
-        digits_max=9
-        @max=999999999
+        digits_max=10
+        @max=4294967295
       when 5,8,10,11,12
         digits_max=3
         @max=255

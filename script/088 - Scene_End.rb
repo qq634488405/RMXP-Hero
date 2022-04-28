@@ -12,6 +12,9 @@ class Scene_End
     # 生成主窗口
     @main_window = Window_Base.new(0,0,640,480)
     @actor = $game_actor
+    # 获取游戏时间
+    @time = (@actor.age-14)*43200+@actor.play_time
+    @time = [@time,Graphics.frame_count/Graphics.frame_rate].max
     @end_step = 1
     # 执行过渡
     Graphics.transition
@@ -43,13 +46,16 @@ class Scene_End
   # ● 获取结局评价
   #--------------------------------------------------------------------------
   def get_end_com
-    # 获取游戏时间
-    time = (@actor.age-14)*43200+@actor.play_time
-    time = [time,Graphics.frame_count/Graphics.frame_rate].max
-    hour,min,sec = time/60/60,time/60%60,time%60
+    hour,min,sec = @time/60/60,@time/60%60,@time%60
     n_time = sprintf("%02d:%02d:%02d", hour, min, sec)
     # 杀NPC数
     npc_kill = @actor.kill_list.size
+    # 去掉阴间十王，喽啰和坛主
+    @actor.kill_list.each do |i|
+      if (150..170).include?(i) or (173..194).include?(i)
+        npc_kill -= 1
+      end
+    end
     npc_kill = [@actor.kill_num,npc_kill].max
     # 追杀数
     kill_num = @actor.morals >= 128? @actor.badman_kill : @actor.task_kill
@@ -102,7 +108,7 @@ class Scene_End
     end_text = $data_system.end_status.deep_clone
     ranks = get_end_com
     end_rep = ["all_time","kill_npc","all_kill","morals","end_lv"]
-    @main_window.contens.clear
+    @main_window.contents.clear
     # 替换并显示文本
     end_text.each_index do |i|
       end_text[i].gsub!(end_rep[i],ranks[i])
@@ -122,10 +128,10 @@ class Scene_End
   def update_to_real
     end_id = (@actor.morals>=160 or @actor.morals<100) ? 1 : 0
     end_text = $data_text.end_text[end_id].deep_clone
-    @main_window.contens.clear
+    @main_window.contents.clear
     # 描绘文本
     end_text.each_index do |i|
-      @main_window.contents.draw_text(32,128,576,32,end_text[i])
+      @main_window.contents.draw_text(32,96+32*i,576,32,end_text[i])
     end
     # 按下 B 键或 C 键的情况
     if Input.trigger?(Input::B) or Input.trigger?(Input::C)

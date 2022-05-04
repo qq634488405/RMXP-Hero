@@ -23,6 +23,7 @@ module RPG
     attr_accessor :add_agi                  # 增加敏捷
     attr_accessor :add_int                  # 增加悟性
     attr_accessor :add_bon                  # 增加根骨
+    attr_accessor :add_fac                  # 增加外貌
     attr_accessor :exp                      # 经验
     #--------------------------------------------------------------------------
     # ● 初始化对像
@@ -39,6 +40,7 @@ module RPG
       @add_agi = 0
       @add_int = 0
       @add_bon = 0
+      @add_fac = 0
       @exp = 0
     end
   end

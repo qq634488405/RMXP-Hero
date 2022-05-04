@@ -19,6 +19,7 @@ module RPG
     attr_accessor :tan_reward               # XX坛结束奖励
     attr_accessor :tan_finish               # 所有坛结束
     attr_accessor :tan_map_xy               # XX坛传送点
+    attr_accessor :sword_weapon             # 铸剑挑战武器
     #--------------------------------------------------------------------------
     # ● 初始化对像
     #--------------------------------------------------------------------------
@@ -33,6 +34,7 @@ module RPG
       @tan_reward = []
       @tan_finish = ""
       @tan_map_xy = {}
+      @sword_weapon = []
     end
   end
 end

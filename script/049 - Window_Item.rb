@@ -59,7 +59,6 @@ class Window_Item < Window_Selectable
       name = $data_items[id].name
     when 2 # 武器
       name = $data_weapons[id].name
-      name = @actor.sword_name if id == 31
     when 3 # 装备
       name = $data_armors[id].name
     end
@@ -194,7 +193,6 @@ class Window_Item < Window_Selectable
         text = $data_items[id].description.dup
       when 2 # 武器
         text = $data_weapons[id].description.dup
-        text += @actor.sword_name if id == 31
       when 3 # 装备
         text = $data_armors[id].description.dup
       end

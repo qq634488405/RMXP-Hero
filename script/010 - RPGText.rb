@@ -140,6 +140,23 @@ module RPG
     attr_accessor :battle_item              # 战利品
     attr_accessor :die_msg                  # 玩家死亡文本
     attr_accessor :game_score               # 小游戏得分
+    attr_accessor :enter_sword              # 进入铸剑谷
+    attr_accessor :sword_ask                # 是否开启铸剑挑战
+    attr_accessor :sword_no_bag             # 铸剑挑战物品满
+    attr_accessor :sword_battle             # 铸剑挑战给武器
+    attr_accessor :sword_pass               # 通过铸剑挑战
+    attr_accessor :sword_fail               # 铸剑挑战失败
+    attr_accessor :sword_win                # 铸剑挑战胜利
+    attr_accessor :sword_no_match           # 铸剑挑战武器不符
+    attr_accessor :have_sword               # 已有铸造武器
+    attr_accessor :welcome_sword            # 欢迎铸剑谷
+    attr_accessor :choose_type              # 选择武器类别
+    attr_accessor :sword_unequip            # 武器需卸下
+    attr_accessor :sword_no_exp             # 铸造经验不足
+    attr_accessor :sword_no_gold            # 铸造金钱不足
+    attr_accessor :rename_sword             # 武器重命名
+    attr_accessor :sword_is_making          # 武器铸造中
+    attr_accessor :sword_status             # 武器状态
     #--------------------------------------------------------------------------
     # ● 初始化对像
     #--------------------------------------------------------------------------
@@ -164,6 +181,7 @@ module RPG
       @woman_ask = ""
       @gu_no_reward = ""
       @task_undo_text = []
+      @tan_start = ""
       @give_task_text = []
       @no_npc_live = ""
       @no_kill_task = ""
@@ -274,6 +292,23 @@ module RPG
       @battle_item = ""
       @die_msg = []
       @game_score = []
+      @enter_sword = ""
+      @sword_ask = ""
+      @sword_no_bag = ""
+      @sword_battle = []
+      @sword_pass = ""
+      @sword_fail = ""
+      @sword_win = ""
+      @sword_no_match = []
+      @have_sword = ""
+      @welcome_sword = ""
+      @choose_type = ""
+      @sword_unequip = ""
+      @sword_no_exp = ""
+      @sword_no_gold = ""
+      @rename_sword = ""
+      @sword_is_making = ""
+      @sword_status = ""
     end
   end
 end

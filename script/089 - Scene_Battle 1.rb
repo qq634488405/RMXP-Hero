@@ -64,8 +64,14 @@ class Scene_Battle
     end
     # 附加铸造武器状态
     add_sword_state
-    # 随机出手
-    rand(100) > 50 ? start_phase1 : start_phase2
+    # 如果是铸剑挑战，获得武器并显示挑战文本
+    if @type == 1
+      @sword_step = 0
+      @phase = 6
+      show_sword_battle
+    else
+      start_battle
+    end
     # 主循环
     loop do
       # 刷新游戏画面
@@ -218,16 +224,18 @@ class Scene_Battle
     return if judge
     # 回合分支
     case @phase
-    when 1  # 角色回合
+    when 1 # 角色回合
       update_phase1
-    when 2  # 敌方回合
+    when 2 # 敌方回合
       update_phase2
-    when 3  # 角色命令回合
+    when 3 # 角色命令回合
       update_phase3
-    when 4  # 胜负判断
+    when 4 # 胜负判断
       update_phase4
-    when 5  # 战斗结束
+    when 5 # 战斗结束
       update_phase5
+    when 6 # 铸剑挑战
+      update_phase6
     end
   end
   #--------------------------------------------------------------------------
@@ -238,12 +246,7 @@ class Scene_Battle
     @phase = 1
     # 玩家状态改变
     @actor_states_refresh = true
-    # 激活选项窗口
-    @battle_menu.bitmap.clear
-    @battle_menu.visible = true
-    @battle_main = true
-    @battle_index = menu_id
-    update_battle_position
+    return_main_menu(menu_id)
   end
   #--------------------------------------------------------------------------
   # ● 刷新画面 (角色命令回合)
@@ -297,7 +300,7 @@ class Scene_Battle
     if Input.trigger?(Input::B)
       # 演奏取消 SE
       $game_system.se_play($data_system.cancel_se)
-      start_phase1
+      return_main_menu
       return
     end
     # 按下 左 的情况
@@ -408,7 +411,7 @@ class Scene_Battle
     @item_window = nil
     @type_window.dispose
     @type_window = nil
-    start_phase1(3)
+    return_main_menu(3)
   end
   #--------------------------------------------------------------------------
   # ● 描绘文本
@@ -466,5 +469,16 @@ class Scene_Battle
     @battle_main = false
     @battle_menu.visible = false
     @battle_name.visible = false
+  end
+  #--------------------------------------------------------------------------
+  # ● 激活主菜单
+  #--------------------------------------------------------------------------
+  def return_main_menu(menu_id = 0)
+    # 激活选项窗口
+    @battle_menu.bitmap.clear
+    @battle_menu.visible = true
+    @battle_main = true
+    @battle_index = menu_id
+    update_battle_position
   end
 end

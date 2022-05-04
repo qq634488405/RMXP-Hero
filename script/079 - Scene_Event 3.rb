@@ -359,7 +359,7 @@ class Scene_Event
   #--------------------------------------------------------------------------
   # ● 开始战斗
   #--------------------------------------------------------------------------
-  def call_battle(id)
+  def call_battle(id,type = 0)
     # 清除菜单调用标志
     $game_temp.menu_calling = false
     $game_temp.menu_beep = false
@@ -373,7 +373,7 @@ class Scene_Event
       bgm = $data_system.battle_bgm
     end
     $game_system.bgm_play(bgm)
-    $scene = Scene_Battle.new(id)
+    $scene = Scene_Battle.new(id,type)
   end
   #--------------------------------------------------------------------------
   # ● 释放NPC相关菜单
@@ -384,5 +384,20 @@ class Scene_Event
       @npc_status.dispose
     end
     @npc_name.dispose
+  end
+  #--------------------------------------------------------------------------
+  # ● 干匠对话
+  #--------------------------------------------------------------------------
+  def sword_talk
+    # 经验不足150000返回nil，常规对话
+    return nil if @actor.exp < 150000
+    # 已完成铸剑挑战
+    if @actor.sword_battle
+      @talk_step = 5
+      return $data_text.enter_sword.dup
+    else # 询问是否挑战
+      @talk_step = 6
+      return $data_text.sword_ask.dup
+    end
   end
 end

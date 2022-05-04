@@ -75,7 +75,7 @@ class Game_Battler
       result = check_magic_require(skill_id,sp_skill.magic_data)
       return result if not result[0]
     end
-    check_list = @cool_down.deep_clone & @states.deep_clone
+    check_list = @cool_down.deep_clone | @states.deep_clone
     # 检查绝招冲突
     unless sp_skill.crash_skill.empty?
       # 冲突绝招处于冷却或持续则不可使用
@@ -274,21 +274,23 @@ class Game_Battler
     when 1 # 百分比
       @maxfp += @maxfp*item.add_mfp[1]/100
     end
-    # 增加法力
-    case item.add_mp[0]
-    when 0 # 实际数值
-      @mp += item.add_mp[1]
-      @mp = [@mp,@maxmp*2].min
-    when 1 # 百分比
-      @mp += @maxmp*item.add_mp[1]/100
-      @mp = [@mp,@maxmp*2].min
-    end
-    # 增加法力上限
-    case item.add_mmp[0]
-    when 0 # 实际数值
-      @maxmp += item.add_mmp[1]
-    when 1 # 百分比
-      @maxmp += @maxmp*item.add_mmp[1]/100
+    if @class_id == 8
+      # 增加法力，仅对茅山派有效
+      case item.add_mp[0]
+      when 0 # 实际数值
+        @mp += item.add_mp[1]
+        @mp = [@mp,@maxmp*2].min
+      when 1 # 百分比
+        @mp += @maxmp*item.add_mp[1]/100
+        @mp = [@mp,@maxmp*2].min
+      end
+      # 增加法力上限，仅对茅山派有效
+      case item.add_mmp[0]
+      when 0 # 实际数值
+        @maxmp += item.add_mmp[1]
+      when 1 # 百分比
+        @maxmp += @maxmp*item.add_mmp[1]/100
+      end
     end
     # 过程结束
     return true
@@ -336,7 +338,7 @@ class Game_Battler
           text.push([sp_skill.fail_text[0].deep_clone,self.damage])
         end
       when -2 # 灼烧
-        self.damage = target.mp-Integer(rand(@fp))
+        self.damage = [target.mp-Integer(rand(@fp)),0].max
         n_text = $data_system.fire_hurt.dup
         n_text.gsub!("user",user_name)
         text.push([n_text,self.damage])

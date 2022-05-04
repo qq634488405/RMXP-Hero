@@ -160,7 +160,7 @@ class Game_Task
       @find_reward = reward*3
     when 3 # 杀人
       @kill_id = task_id
-      @kill_name = $data_enemies[@visit_id].name
+      @kill_name = $data_enemies[@kill_id].name
       name = @kill_name
       @kill_time = offset_time
       @kill_reward = reward*3
@@ -332,6 +332,7 @@ class Game_Task
   # ● 功夫提高等级
   #--------------------------------------------------------------------------
   def kf_level_up(lv)
+    return if @actor.skill_list.empty?
     @actor.skill_list.each_index do |i|
       @actor.skill_list[i][1] = [@actor.skill_list[i][1]+lv,255].min
     end
@@ -351,19 +352,19 @@ class Game_Task
       @actor.gain_gold(60000)
     when 3 # 朱雀坛
       @actor.maxfp += 150
-    when 4 
+    when 4 # 山岚坛
       @actor.gain_gold(60000)
       @actor.maxfp += 200
-    when 5
+    when 5 # 玄武坛
       @actor.exp += 60000
       @actor.maxfp += 200
-    when 6
+    when 6 # 紫煞坛
       kf_level_up(3)
       @actor.gain_gold(60000)
-    when 7
+    when 7 # 天徽坛
       kf_level_up(3)
       @actor.exp += 60000
-    when 8
+    when 8 # 白虎坛
       kf_level_up(3)
       @actor.maxfp += 200
     end

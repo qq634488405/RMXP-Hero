@@ -227,6 +227,10 @@ class Scene_Event
       update_text
     when 4 # 是否完成中年妇人任务
       update_old_woman
+    when 5 # 铸剑谷
+      update_sword
+    when 6 # 铸剑挑战
+      update_sword_battle
     end
   end
   #--------------------------------------------------------------------------
@@ -319,6 +323,91 @@ class Scene_Event
         show_text(task_finish(2))
         @talk_step=3
       when 1
+        $scene=Scene_Map.new
+      end
+    end
+  end
+  #--------------------------------------------------------------------------
+  # ● 刷新进入铸剑谷
+  #--------------------------------------------------------------------------
+  def update_sword
+    # 按下 B 键的情况或按下 C 键的情况
+    if Input.trigger?(Input::B) or Input.trigger?(Input::C)
+      # 播放移动SE
+      $game_system.se_play($data_system.move_se)
+      $scene = Scene_Map.new
+      # 设置主角的移动目标
+      $game_map.setup(67)
+      $game_player.moveto(9,11)
+      $game_player.turn_up
+      $game_player.straighten
+      $game_map.autoplay
+      # 准备过渡
+      Graphics.freeze
+      # 设置过渡处理中标志
+      $game_temp.transition_processing = true
+      $game_temp.transition_name = ""
+    end
+  end
+  #--------------------------------------------------------------------------
+  # ● 刷新NPC隐藏任务选单
+  #--------------------------------------------------------------------------
+  def update_sword_battle
+    @confirm_window.visible=true
+    @confirm_window.active=true
+    # 按下 B 键的情况下
+    if Input.trigger?(Input::B)
+      # 演奏取消 SE
+      $game_system.se_play($data_system.cancel_se)
+      $scene = Scene_Map.new
+      return
+    end
+    # 按下 C 键的情况下
+    if Input.trigger?(Input::C)
+      # 演奏确定 SE
+      $game_system.se_play($data_system.decision_se)
+      case @confirm_window.index
+      when 0
+        # 背包已满无法挑战
+        if @actor.full_item_bag?
+          @confirm_window.visible = false
+          @confirm_window.active = false
+          show_text($data_text.sword_no_bag)
+          @talk_step = 3
+        else
+          call_battle(149,1)
+        end
+      when 1
+        $scene=Scene_Map.new
+      end
+    end
+  end
+  #--------------------------------------------------------------------------
+  # ● 刷新铸剑
+  #--------------------------------------------------------------------------
+  def update_make_sword
+    @confirm_window.visible = true
+    @confirm_window.active = true
+    @confirm_window.x=80
+    # 按下 B 键的情况
+    if Input.trigger?(Input::B)
+      # 回到地图
+      $scene=Scene_Map.new
+      return
+    end
+    # 按下 C 键的情况
+    if Input.trigger?(Input::C)
+      if @actor.sword_type == -1
+        # 选择武器类别后保存
+        @actor.sword_type = @confirm_window.index
+        @actor.input_name = true
+        show_text($data_text.sword_is_making.dup)
+        $game_temp.write_save_data
+        @confirm_window.visible = false
+        @confirm_window.active = false
+        @phase = 1
+      else
+        # 回到地图
         $scene=Scene_Map.new
       end
     end

@@ -75,15 +75,7 @@ class Scene_Create
   # ● 检查姓名长度
   #--------------------------------------------------------------------------
   def check_name_size
-    name_length = 0.0
-    # 根据字节计算字符数量
-    @actor.name.each_byte do |i|
-      # 半角符号占1字节
-      name_length += 0.5 if i < 128
-      # 中文字符占3字节
-      name_length += 1.0/3 if i >= 128
-    end
-    if name_length > 5 or @actor.name == ""
+    if @actor.name.new_size > 10 or @actor.name == ""
       $game_system.se_play($data_system.buzzer_se)
       print($data_system.name_error)
       @actor.name=""
@@ -162,7 +154,7 @@ class Scene_Create
       quit_flag=false
       quit_flag=true if @actor.name.size>10 or @actor.name==""
       # 检查密码长度
-      if $word.size>18
+      if $word.new_size>18
         print($data_system.long_pas)
         quit_flag=true
       end

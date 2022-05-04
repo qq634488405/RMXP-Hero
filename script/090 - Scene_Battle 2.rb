@@ -26,7 +26,7 @@ class Scene_Battle
     @kf_window = nil
     @type_window.dispose
     @type_window = nil
-    start_phase1(4)
+    return_main_menu(4)
   end
   #--------------------------------------------------------------------------
   # ● 刷新画面 (类型选择)
@@ -126,7 +126,7 @@ class Scene_Battle
         return
       end
       # 不能使用的情况下
-      unless @actor.item_can_use?(1,item[1])
+      unless @actor.item_can_use?(item[1])
         # 演奏冻结 SE
         $game_system.se_play($data_system.buzzer_se)
         # 切换到分类
@@ -142,7 +142,7 @@ class Scene_Battle
         return
       end
       # 如果物品用完的情况下
-      if @actor.item_number(item[1]) == 0
+      if @actor.item_number(1,item[1]) == 0
         # 演奏冻结 SE
         $game_system.se_play($data_system.buzzer_se)
         return
@@ -191,6 +191,7 @@ class Scene_Battle
     flag = (flag or (@actor.maxhp<@actor.full_hp and item.add_mhp[1]>0))
     flag = (flag or (@actor.fp<@actor.maxfp and item.add_fp[1]>0))
     flag = (flag or (@actor.mp<@actor.maxmp and item.add_mp[1]>0))
+    flag = (flag or item.add_mfp[1]>0 or item.add_mmp[1]>0)
     return (not flag)
   end
   #--------------------------------------------------------------------------
@@ -263,7 +264,7 @@ class Scene_Battle
     # 释放内力窗口
     @fp_window.dispose
     @fp_window = nil
-    start_phase1(2)
+    return_main_menu(2)
   end
   #--------------------------------------------------------------------------
   # ● 刷新画面 (内力选择)
@@ -339,6 +340,7 @@ class Scene_Battle
     if Input.trigger?(Input::B)
       $game_system.se_play($data_system.cancel_se)
       @num_window.dispose
+      @num_window = nil
       @fp_window.active = true
       return
     end
@@ -373,7 +375,7 @@ class Scene_Battle
     end
     list.fill_space_to_max
     # 生成绝招窗口
-    @skill_window=Window_Command.new(list.max_length*8+80,list,1,1,1,0,0,320)
+    @skill_window=Window_Command.new(list.max_length*12+80,list,1,1,1,0,0,320)
     @skill_window.x = (640 - @skill_window.width)/2
     @skill_window.z,@skill_window.index = 600,0
   end
@@ -385,6 +387,9 @@ class Scene_Battle
     @skill_window.dispose
     @skill_window = nil
     case n_phase
+    when 0
+      @phase = 1
+      return_main_menu
     when 1
       start_phase1(1)
     when 2

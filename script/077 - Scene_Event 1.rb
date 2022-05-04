@@ -22,6 +22,7 @@ class Scene_Event
   #           11--喝酒
   #           12--联机
   #           13--跳转地图，id--地图ID，number--入口ID
+  #           14--铸剑
   #--------------------------------------------------------------------------
   def initialize(type,id=0,number=1)
     $eat_flag = true
@@ -82,6 +83,12 @@ class Scene_Event
       net_battle
     when 13 # 跳转XX坛
       move_to_tan
+    when 14 # 铸剑
+      if @actor.sword_type == -1
+        @confirm_window=Window_Command.new(480,$data_system.sword_menu,4,3)
+        @confirm_window.y=416
+      end
+      make_sword
     end
     if @confirm_window == nil
       @confirm_window=Window_Command.new(240,$data_system.confirm_choice,2,3)
@@ -119,6 +126,7 @@ class Scene_Event
   #--------------------------------------------------------------------------
   def update
     # 刷新窗口
+    $game_screen.update
     @talk_window.update
     @confirm_window.update
     # 根据不同阶段进行刷新
@@ -137,8 +145,8 @@ class Scene_Event
       update_net
     when 7 # 连续显示文本
       update_text_gp
-    when 8
-      update_choose
+    when 8 # 刷新铸剑
+      update_make_sword
     when 9 # 自杀
       update_kill_self
     end
@@ -368,12 +376,16 @@ class Scene_Event
       return
     end
     # 失去一个女儿红
-    @actor.lose_item([1,16])
+    @actor.lose_item(1,16)
     # 时间+3小时
-    @actor.time+=10800
-    show_text($data_text.drink_wine_text)
+    @actor.play_time+=10800
+    $game_system.se_play($data_system.move_se)
     # 闪烁
     $game_screen.start_flash(Color.new(144,176,87,255),50)
+    # 任务时间增加
+    $game_task.wanted_time -= 10800
+    $game_task.stone_time -= 10800
+    show_text($data_text.drink_wine_text)
   end
   #--------------------------------------------------------------------------
   # ● 联机对战
@@ -399,5 +411,30 @@ class Scene_Event
     # 设置过渡处理中标志
     $game_temp.transition_processing = true
     $game_temp.transition_name = ""
+  end
+  #--------------------------------------------------------------------------
+  # ● 铸剑
+  #--------------------------------------------------------------------------
+  def make_sword
+    # 如果有待命名的武器
+    if @actor.input_name
+      show_text($data_text.hava_sword)
+      @phase = 1
+      return
+    end
+    @phase = 8
+    # 尚未铸造武器
+    if @actor.sword_type == -1
+      text = $data_text.welcome_sword + $data_text.choose_type
+    else
+      # 显示武器状态
+      text = $data_text.welcome_sword + $data_text.sword_status
+      need_exp = (@actor.sword_times + 1) * 100000
+      need_gold = @actor.exp / 2
+      text.gsub!("name",@actor.sword_name)
+      text.gsub!("exp",need_exp.to_s)
+      text.gsub!("gold",need_gold.to_s)
+    end
+    show_text(text)
   end
 end

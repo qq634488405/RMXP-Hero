@@ -15,7 +15,7 @@ class Window_ShopNumber < Window_Base
     @max = 1
     @price = 0
     @number = 1
-    @index = 0
+    @index = 2
     refresh
     update_cursor_rect
   end

@@ -130,7 +130,7 @@ class Scene_Study
         $game_system.se_play($data_system.buzzer_se)
         return
       end
-      if @id = -1 # 功夫未学
+      if @list_id == -1 # 功夫未学
         @actor.skill_list.push([kf_id,0,0,0])
         @list_id = @actor.get_kf_index(kf_id)
       end

@@ -93,25 +93,73 @@ class Scene_Title
     @cheat_mode = false
     # 密码正确或为作弊密码则进入下一步
     if @password==$word or @password==$data_system.cheat_code or ($word==nil and @password=="")
-      @next_step=true
+      @start_step = 2
       # 作弊模式开启
       @cheat_mode=true if @password==$data_system.cheat_code
+      # 读取数据字串
+      data = Marshal.load(@file)
+      crcs = Marshal.load(@file)
+      # 数据校验
+      key = 1313
+      data.each_index do |i|
+        key = Zlib.crc32(data[i],key)
+        unless crcs[i] == key
+          @file.close
+          # 删除异常存档
+          File.delete("Save/Gmud.sav")
+          print($data_system.error_save)
+          $scene=Scene_Scroll.new(1)
+          return
+        end
+      end
+      @file.close
+      init_save_data(data)
       return
     end
     print($data_system.error_pas)
-    @next_step=false
+    @start_step = 0
+  end
+  #--------------------------------------------------------------------------
+  # ● 检查武器名字
+  #--------------------------------------------------------------------------
+  def check_weapon_name
+    # 检查武器名长度
+    if @password == "" or @password.new_size > 8
+      print($data_system.name_error)
+      return
+    end
+    # 检查是否与现有武器重名
+    next_step = true
+    for i in 1..30
+      if @password == $data_weapons[i].name
+        next_step = false
+        break
+      end
+    end
+    # 没有重名
+    if next_step
+      @start_step = 2
+      $game_actor.sword_name = @password
+      $game_actor.input_name = false
+      $game_actor.gain_item(2,31)
+      # 设置铸造武器属性
+      $game_actor.set_sword
+      $game_temp.write_save_data
+    else
+      print($data_system.name_error)
+    end
   end
   #--------------------------------------------------------------------------
   # ● 读取存档文件
   #--------------------------------------------------------------------------
   def load_gmud_save
-    file = File.open("Save/Gmud.sav","rb")
+    @file = File.open("Save/Gmud.sav","rb")
     # 读取描绘存档文件用的角色数据
-    characters = Marshal.load(file)
+    characters = Marshal.load(@file)
     # 读取测量游戏时间用画面计数
-    Graphics.frame_count = Marshal.load(file)
+    Graphics.frame_count = Marshal.load(@file)
     # 读取密码
-    $word = Marshal.load(file)
+    $word = Marshal.load(@file)
     @password = ""
     # 播放密码输入BGM
     $game_system.bgm_play($data_system.password_bgm)
@@ -121,7 +169,7 @@ class Scene_Title
     @pass_window=Window_Command.new(320,$data_system.input_pas,1)
     @pass_window.x = 320 - @pass_window.width / 2
     @pass_window.y = 240 - @pass_window.height / 2
-    @next_step=false
+    @start_step = 0
     # 执行过渡
     Graphics.transition
     # 主循环
@@ -133,7 +181,7 @@ class Scene_Title
       # 刷新画面
       update
       # 如果画面被切换就中断循环
-      if @next_step or $scene != self
+      if @start_step == 2 or $scene != self
         break
       end
     end
@@ -141,25 +189,69 @@ class Scene_Title
     Graphics.freeze
     # 释放密码窗口
     @pass_window.dispose
+    @weapon_title.dispose if @weapon_title != nil
     # 释放密码窗口图形
     @sprite.bitmap.dispose
     @sprite.dispose
-    # 读取数据字串
-    data = Marshal.load(file)
-    crcs = Marshal.load(file)
-    # 数据校验
-    key = 1313
-    data.each_index do |i|
-      key = Zlib.crc32(data[i],key)
-      unless crcs[i] == key
-        file.close
-        # 删除异常存档
-        File.delete("Save/Gmud.sav")
-        print($data_system.error_save)
-        $scene=Scene_Scroll.new(1)
+    # 设置系统默认字体
+    Font.default_name = (["WQX12","宋体","黑体","楷体"])
+    # 初始化任务
+    $game_task = Game_Task.new
+  end
+  #--------------------------------------------------------------------------
+  # ● 刷新画面
+  #--------------------------------------------------------------------------
+  def update
+    case @start_step
+    when 0 # 输入密码
+      # 根据密码内容更改显示
+      if @password != ""
+        @pass_window.change_item(0,$data_system.have_pas)
+      else
+        @pass_window.change_item(0,$data_system.no_pas)
+      end
+      # 刷新命令窗口
+      @pass_window.update
+      # 按下 C 键的情况下
+      if Input.trigger?(Input::C)
+        # 播放决定SE
+        $game_system.se_play($data_system.decision_se)
+        # 命令窗口的光标位置的分支
+        case @pass_window.index
+        when 0  # 输入密码
+          input_password
+        when 1  # 确认
+          check_password
+        end
+      end
+    when 1 # 输入武器名字
+      # 刷新命令窗口
+      @pass_window.update
+      @weapon_title.update
+      if @password != ""
+        text = $data_system.set_weapon_name[0].deep_clone
+        text.gsub!("------",@password)
+        @pass_window.change_item(0,text)
+      else
+        @pass_window.change_item(0,$data_system.set_weapon_name[0])
+      end
+      if Input.trigger?(Input::C)
+        # 播放决定SE
+        $game_system.se_play($data_system.decision_se)
+        # 命令窗口的光标位置的分支
+        case @pass_window.index
+        when 0  # 输入武器名字
+          input_password
+        when 1  # 确认
+          check_weapon_name
+        end
       end
     end
-    file.close
+  end
+  #--------------------------------------------------------------------------
+  # ● 初始化游戏
+  #--------------------------------------------------------------------------
+  def init_save_data(data)
     # 读取各种游戏对象
     $game_system        = Marshal.load(Zlib::Inflate.inflate(data[0]))
     $game_self_switches = Marshal.load(Zlib::Inflate.inflate(data[1]))
@@ -183,36 +275,21 @@ class Scene_Title
     $game_actor.unequip_all
     $game_actor.check_item_bag
     $game_actor.check_stone_list
-    # 设置系统默认字体
-    Font.default_name = (["WQX12","宋体","黑体","楷体"])
-    # 设置铸造武器属性
-    $game_actor.set_sword
-    # 初始化任务
-    $game_task = Game_Task.new
-  end
-  #--------------------------------------------------------------------------
-  # ● 刷新画面
-  #--------------------------------------------------------------------------
-  def update
-    # 根据密码内容更改显示
-    if @password != ""
-      @pass_window.change_item(0,$data_system.have_pas)
+    # 需要输入武器名字的情况且背包可获得武器
+    if $game_actor.input_name and $game_actor.can_get_item?(2,31)
+      @start_step = 1
+      @password = ""
+      @weapon_title = Sprite_Text.new
+      x = @pass_window.x + (320 - $data_system.weapon_title.new_size * 12)/2
+      y = @pass_window.y - 32
+      @weapon_title.set_up(x,y,$data_system.weapon_title)
+      # 更新窗口命令
+      @pass_window.change_item(0,$data_system.set_weapon_name[0])
+      @pass_window.change_item(1,$data_system.set_weapon_name[1])
+      @pass_window.index = 0
     else
-      @pass_window.change_item(0,$data_system.no_pas)
-    end
-    # 刷新命令窗口
-    @pass_window.update
-    # 按下 C 键的情况下
-    if Input.trigger?(Input::C)
-      # 播放决定SE
-      $game_system.se_play($data_system.decision_se)
-      # 命令窗口的光标位置的分支
-      case @pass_window.index
-      when 0  # 输入密码
-        input_password
-      when 1  # 确认
-        check_password
-      end
+      # 设置铸造武器属性
+      $game_actor.set_sword
     end
   end
 end

@@ -80,7 +80,6 @@ class Game_Battler
         if hit_result >= target.dodge_kf_lv / 3
           # 目标收到伤害并呆若木鸡
           self.damage = hit_result
-          target.hp = [target.hp-hit_result,0].max
           target.maxhp = [target.maxhp-hit_result,0].max
           target.add_state(0,2)
           text = sp_skill.success_text[1].deep_clone
@@ -104,7 +103,7 @@ class Game_Battler
       @hit_plus += 15
       add_state(8,1)
       add_cd_time(8,9)
-      state_add[8] = [[1,15]]
+      states_add[8] = [[1,15]]
       # 计算命中、闪避参数
       hit_para,eva_para = kf_power(0),target.kf_power(1)
       eva_para /= 3 if not target.movable?
@@ -114,7 +113,6 @@ class Game_Battler
         damage1 = (self.str + get_kf_efflv(24)) * 2
         damage2 = self.hit + get_kf_efflv(24)
         self.damage = damage1
-        target.hp = [target.hp-damage1,0].max
         target.maxhp = [target.maxhp-damage2,0].max
         add_state(0,3)
         text = sp_skill.success_text[0].deep_clone
@@ -187,7 +185,6 @@ class Game_Battler
       if hit_result >= target.fp/3
         damage = @fp/10+@fp_plus-target.fp/30
         self.damage = damage
-        target.hp = [target.hp-damage,0].max
         target.maxhp = [target.maxhp-damage/2,0].max
         add_cd_time(15,2)
         text = sp_skill.success_text[0].deep_clone
@@ -197,7 +194,7 @@ class Game_Battler
         add_state(0,turns)
         text = sp_skill.fail_text[0].deep_clone
       else
-        self.damage = 100
+        self.damage = 0
         target.fp = target.fp < 200 ? 0 : target.fp - 100
         text = sp_skill.equal_text[0].deep_clone
       end
@@ -207,7 +204,7 @@ class Game_Battler
       # rand(内力)≥目标内力/3
       if hit_result >= target.fp/3
         fp_damage = @fp/10+350+@fp_plus
-        self.damage = fp_damage
+        self.damage = 0
         target.fp = [target.fp-fp_damage,0].max
         add_cd_time(16,2)
         text = sp_skill.success_text[0].deep_clone
@@ -217,7 +214,7 @@ class Game_Battler
         add_state(0,turns)
         text = sp_skill.fail_text[0].deep_clone
       else
-        self.damage = 350
+        self.damage = 0
         target.fp = [target.fp - 350,0].max
         text = sp_skill.equal_text[0].deep_clone
       end
@@ -298,7 +295,6 @@ class Game_Battler
         turns = get_kf_efflv(37)/35+3
         target.add_state(0,turns)
         self.damage = get_kf_efflv(37)/3
-        target.hp = [target.hp-get_kf_efflv(37)/3,0].max
         text = sp_skill.success_text[0].deep_clone
       else
         self.damage = "Miss"
@@ -334,7 +330,6 @@ class Game_Battler
         turns = get_kf_efflv(47)/30+1
         self.damage = get_kf_efflv(47)+5-target.maxfp/10
         target.add_state(0,turns)
-        target.hp -= self.damage
         text = sp_skill.success_text[0].deep_clone
       else
         self.damage = "Miss"

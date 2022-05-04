@@ -15,7 +15,7 @@ class Scene_Battle
       # 演奏取消 SE
       $game_system.se_play($data_system.cancel_se)
       # 返回玩家回合
-      end_skill_select(1)
+      end_skill_select(0)
       return
     end
     # 按下 C 键的情况下
@@ -33,7 +33,7 @@ class Scene_Battle
         # 显示错误文本
         show_text(result[1])
         # 返回玩家回合
-        end_skill_select(1)
+        end_skill_select(0)
       end
     end
   end
@@ -373,5 +373,81 @@ class Scene_Battle
     user.remove_cd_auto
     # 刷新状态窗口
     @status_window.update
+  end
+  #--------------------------------------------------------------------------
+  # ● 开始战斗
+  #--------------------------------------------------------------------------
+  def start_battle
+    # 随机出手
+    rand(100) > 50 ? start_phase1 : start_phase2
+  end
+  #--------------------------------------------------------------------------
+  # ● 显示铸剑战斗对话
+  #--------------------------------------------------------------------------
+  def show_sword_battle
+    # 显示对话并获得武器
+    @msg_window.auto_text($data_text.sword_battle[@sword_step].deep_clone)
+    @msg_window.visible = true
+    @actor.gain_item(2,$data_tasks.sword_weapon[@sword_step])
+    @sword_talk = 1
+  end
+  #--------------------------------------------------------------------------
+  # ● 显示铸剑战斗通过对话
+  #--------------------------------------------------------------------------
+  def show_sword_pass
+    # 显示对话并设置铸剑挑战标志
+    @msg_window.auto_text($data_text.sword_pass.dup)
+    @msg_window.visible = true
+    @actor.sword_battle = true
+    @sword_talk = 2
+  end
+  #--------------------------------------------------------------------------
+  # ● 移除铸剑挑战武器
+  #--------------------------------------------------------------------------
+  def remove_sword_weapon
+    # 移除铸剑挑战武器，设置玩家为空手
+    bag_id = @actor.get_item_index(2,$data_tasks.sword_weapon[@sword_step],1)
+    @actor.lose_bag_id(bag_id)
+    @actor.weapon_id = 0
+  end
+  #--------------------------------------------------------------------------
+  # ● 刷新铸剑挑战
+  #--------------------------------------------------------------------------
+  def update_phase6
+    # 按下 B 键的情况或按下 C 键的情况
+    if Input.trigger?(Input::B) or Input.trigger?(Input::C)
+      case @sword_talk
+      when 0 # 判定是否挑战通过
+        if @sword_step < 4
+          show_sword_battle
+        else
+          show_sword_pass
+        end
+      when 1 # 转入战斗
+        start_battle
+      when 2 # 进入铸剑谷
+        # 还原为战斗开始前的 BGM
+        $game_system.bgm_play($game_temp.map_bgm)
+        # 清除战斗中标志
+        $game_temp.in_battle = false
+        # 清除临时数据
+        @actor.clear_temp_data
+        @enemy.clear_temp_data
+        # 播放移动SE
+        $game_system.se_play($data_system.move_se)
+        $scene = Scene_Map.new
+        # 设置主角的移动目标
+        $game_map.setup(67)
+        $game_player.moveto(9,11)
+        $game_player.turn_up
+        $game_player.straighten
+        $game_map.autoplay
+        # 准备过渡
+        Graphics.freeze
+        # 设置过渡处理中标志
+        $game_temp.transition_processing = true
+        $game_temp.transition_name = ""
+      end
+    end
   end
 end

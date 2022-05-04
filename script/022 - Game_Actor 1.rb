@@ -35,6 +35,7 @@ class Game_Actor < Game_Battler
   attr_accessor :badman_kill              # 击杀恶人数量
   attr_accessor :task_kill                # 平一指任务完成数量
   attr_accessor :sword_battle             # 铸剑挑战
+  attr_accessor :input_name               # 铸造武器输入名字标志
   attr_accessor :sword_name               # 铸剑名称
   attr_accessor :sword_type               # 铸剑类型
   attr_accessor :sword1                   # 铸剑前缀参数
@@ -64,7 +65,7 @@ class Game_Actor < Game_Battler
     @skill_use,@badman_kill,@dance,@ball = [0,0,0,0,0,0],0,100,100
     @states,@stone_list,@kill_list,@task_kill = [],[],[],0
     @states_turn,@tan_id,@sword_battle,@sword_name = {},0,false,""
-    @sword_times,@sword_type,@sword1,@sword2,@sword3 = 0,0,0,0,0
+    @sword_times,@sword_type,@sword1,@sword2,@sword3 = 0,-1,0,0,0
     @sword_exp,@sword_gold,@kill_num = 0,0,0
     @donate_times = 0
   end
@@ -78,15 +79,25 @@ class Game_Actor < Game_Battler
   # ● 设置铸造武器属性 
   #--------------------------------------------------------------------------
   def set_sword
-    return if @sword_type == 0
+    return if @sword_type == -1
+    # 武器名，类别
+    $data_weapons[31].name = @sword_name
+    $data_weapons[31].type = @sword_type
     # 攻击为前缀参数
     $data_weapons[31].atk = @sword1
+    # 获取前缀名
+    name1_id = [@sword1 / 5 , 50].min
+    attr_name = $data_system.sword_name1[name1_id]
     # 中缀、后缀参数/100为类型
     sword2_type = @sword2 / 100
     sword3_type = @sword3 / 100
     # 中缀、后缀参数%100为数值
     sword2_data = @sword2 % 100
     sword3_data = @sword3 % 100
+    # 获取中缀名
+    if sword2_type > 0
+      attr_name += $data_system.sword_name2[sword2_type][sword2_data/3]
+    end
     # 设置中缀属性
     if sword2_type > 2
       # 中缀1，2为战斗中状态效果
@@ -97,8 +108,9 @@ class Game_Actor < Game_Battler
         $data_weapons[31].add_hit = sword2_data
       end
     end
-    # 设置后缀属性
+    # 设置后缀名和属性
     if sword3_type > 0
+      attr_name += $data_system.sword_name3[sword3_type][sword3_data/5]
       case sword3_type
       when 1 # 增加膂力
         $data_weapons[31].add_str = sword3_data
@@ -112,6 +124,8 @@ class Game_Actor < Game_Battler
         $data_weapons[31].add_fac = sword3_data
       end
     end
+    # 修改描述
+    $data_weapons[31].description += attr_name
   end
   #--------------------------------------------------------------------------
   # ● 出售列表，每条数据格式[type,id,num,equip],bag_id
@@ -255,6 +269,10 @@ class Game_Actor < Game_Battler
   #--------------------------------------------------------------------------
   def full_hp
     n = 100 + @maxfp / 4 + ([@age,29].min - 14) * 20
+    # 红莲教义加成
+    if @class_id == 3 and get_kf_level(27) >= 80 and @age >= 20
+      n += get_kf_level(27) * @base_bon / 10
+    end
     return n
   end
   #--------------------------------------------------------------------------
@@ -287,7 +305,7 @@ class Game_Actor < Game_Battler
   # ● 获取相貌等级
   #--------------------------------------------------------------------------
   def face_level
-    return [[face-12,0].max,18].min/3
+    return [[face-10,0].max,21].min/3
   end
   #--------------------------------------------------------------------------
   # ● 背包是否已满

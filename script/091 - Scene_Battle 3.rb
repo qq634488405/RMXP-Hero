@@ -203,19 +203,24 @@ class Scene_Battle
     hide_main_menu
     # 调整信息窗口位置
     @msg_window.contents.clear
-    # 玩家不为坏人且NPC为好人
-    if @actor.morals >=128 and @enemy.morals > 0
-      # 还原为战斗开始前的 BGM
-      $game_system.bgm_play($game_temp.map_bgm)
-      # 显示承让了
-      @msg_window.auto_text($data_text.no_die_text.dup)
-    else # 其他情况玩家被杀死
-      text = $data_text.go_die_text.dup
-      text.gsub!("actor",@actor.name)
-      # 显示去死吧
-      @msg_window.auto_text(text)
-      # 设置游戏结束标志
-      $game_temp.gameover = true
+    # 如果为铸剑挑战
+    if @type == 1
+      remove_sword_weapon
+      # 显示挑战失败对话
+      @msg_window.auto_text($data_text.sword_fail.dup)
+    else
+      # 玩家不为坏人且NPC为好人
+      if @actor.morals >=128 and @enemy.morals > 0
+        # 显示承让了
+        @msg_window.auto_text($data_text.no_die_text.dup)
+      else # 其他情况玩家被杀死
+        text = $data_text.go_die_text.dup
+        text.gsub!("actor",@actor.name)
+        # 显示去死吧
+        @msg_window.auto_text(text)
+        # 设置游戏结束标志
+        $game_temp.gameover = true
+      end
     end
     @msg_window.visible = true
   end
@@ -263,6 +268,30 @@ class Scene_Battle
     hide_main_menu
     # 调整信息窗口位置
     @msg_window.contents.clear
+    # 铸剑挑战胜利
+    if @type == 1
+      # 使用武器与挑战要求不符
+      if @actor.weapon_id != $data_tasks.sword_weapon[@sword_step]
+        # 显示挑战失败对话
+        @msg_window.auto_text($data_text.sword_no_match[@sword_step].deep_clone)
+        @msg_window.visible = true
+        remove_sword_weapon
+        @phase5_step = 2
+        return
+      else
+        # 挑战阶段+1
+        @sword_step += 1
+        remove_sword_weapon
+        # 莫邪重置所有状态
+        @enemy.recover_all
+        @phase = 6
+        @sword_talk = 0
+        # 显示对话
+        @msg_window.auto_text($data_text.sword_win.dup)
+        @msg_window.visible = true
+        return
+      end
+    end
     @msg_window.y = 0
     # 询问劈不劈
     text = $data_text.kill_text.dup
@@ -281,15 +310,15 @@ class Scene_Battle
   #--------------------------------------------------------------------------
   def update_phase5
     case @phase5_step
-    when 1
+    when 1 # 确认砍头
       update_phase5_confirm
-    when 2
+    when 2 # 按键返回地图
       update_phase4
-    when 3
+    when 3 # 捕快任务奖励
       update_phase5_reward
-    when 4
+    when 4 # 战利品
       update_phase5_end
-    when 5
+    when 5 # XX坛奖励
       update_phase5_tan
     end
   end

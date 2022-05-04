@@ -33,7 +33,7 @@ class Scene_Item
     # 生成选择窗口
     @confirm_window=Window_Command.new(240,$data_system.confirm_choice,2,3)
     @confirm_window.x,@confirm_window.y,@confirm_window.z = 200,416,800
-    @confirm_window.visible=false
+    @confirm_window.visible,@confirm_window.active=false,false
     @category_window.active=true
     # 执行过度
     Graphics.transition
@@ -232,13 +232,14 @@ class Scene_Item
     @item_window.refresh
     @item_window.active=false
     @item_window.index=-1
+    @item_window.set_page(0)
     @category_window.active=true
     @help_window.visible=false
     @talk_window.visible=false
     @confirm_window.visible=false
   end
   #--------------------------------------------------------------------------
-  # ● 返回分类
+  # ● 返回物品列表
   #--------------------------------------------------------------------------
   def return_item
     @talk_window.visible=false
@@ -259,6 +260,7 @@ class Scene_Item
     flag = (flag or (@actor.maxhp<@actor.full_hp and item.add_mhp[1]>0))
     flag = (flag or (@actor.fp<@actor.maxfp and item.add_fp[1]>0))
     flag = (flag or (@actor.mp<@actor.maxmp and item.add_mp[1]>0))
+    flag = (flag or item.add_mfp[1]>0 or item.add_mmp[1]>0)
     return (not flag)
   end
   #--------------------------------------------------------------------------
@@ -285,7 +287,7 @@ class Scene_Item
       if @actor.gender == 1 # 女性
         # 演奏冻结 SE
         $game_system.se_play($data_system.buzzer_se)
-        # 切换到分类
+        # 切换到物品列表
         return_item
         return
       elsif @actor.gender == 0 # 男性

@@ -30,7 +30,7 @@ class Scene_Practice
     @talk_window.y,@talk_window.z = 304,500
     # 生成练功窗口
     max_size = @pra_list.max_length
-    @skill_window = Window_Command.new(max_size*8+80,@pra_list,1,3)
+    @skill_window = Window_Command.new(max_size*12+80,@pra_list,1,3)
     @skill_window.x,@skill_window.y = 620-@skill_window.width,74
     # 生成进度条背景窗口
     @info = Window_Base.new(160,10,352,64)
@@ -67,7 +67,6 @@ class Scene_Practice
   def draw_error(text,time=Graphics.frame_rate)
     @talk_window.auto_text(text.dup)
     @talk_window.visible = true
-    @actor.get_kf_efflv(kf_id)*10
     for i in 0..time
       # 刷新画面
       Graphics.update

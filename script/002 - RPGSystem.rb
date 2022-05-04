@@ -49,6 +49,7 @@ module RPG
     attr_accessor :mp_menu                  # 法力菜单
     attr_accessor :battle_menu              # 战斗菜单
     attr_accessor :battle_fp                # 战斗内力菜单
+    attr_accessor :sword_menu               # 铸剑类别
     attr_accessor :cheat_main               # 作弊主菜单
     attr_accessor :cheat_status             # 作弊查看菜单
     attr_accessor :cheat_skill              # 作弊技能菜单
@@ -56,6 +57,8 @@ module RPG
     attr_accessor :fly_position             # 轻功地点
     attr_accessor :chara_set                # 设定人物
     attr_accessor :input_pas                # 输入密码
+    attr_accessor :weapon_title             # 输入武器名字提示
+    attr_accessor :set_weapon_name          # 设置自制武器名字
     attr_accessor :have_pas                 # 已输入密码
     attr_accessor :no_pas                   # 未输入密码
     attr_accessor :long_pas                 # 密码过长
@@ -119,6 +122,7 @@ module RPG
       @mp_menu = []
       @battle_menu = []
       @battle_fp = []
+      @sword_menu = []
       @cheat_main = []
       @cheat_status = []
       @cheat_skill = []
@@ -127,6 +131,8 @@ module RPG
       @chara_set = []
       @input_pas = []
       @have_pas = ""
+      @weapon_title = ""
+      @set_weapon_name = []
       @no_pas = ""
       @long_pas = ""
       @error_pas = ""

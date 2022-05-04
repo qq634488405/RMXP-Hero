@@ -416,11 +416,12 @@ class Game_Battler
   #--------------------------------------------------------------------------
   def recover_all
     @hp = @maxhp
-    @fp = @maxsp
+    @fp = @maxfp
     @mp = @maxmp
     for i in @states.clone
       remove_state(i)
     end
+    clear_temp_data
   end
   #--------------------------------------------------------------------------
   # ● 获取当前的动作

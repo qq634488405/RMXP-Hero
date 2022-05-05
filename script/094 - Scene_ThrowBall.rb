@@ -9,6 +9,7 @@ class Scene_ThrowBall
   # ● 主处理
   #--------------------------------------------------------------------------
   def main
+    $eat_flag = true
     @actor = $game_actor
     @score,@dir,@step = 0,1,1
     # 设置球坐标

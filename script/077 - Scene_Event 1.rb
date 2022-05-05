@@ -423,6 +423,7 @@ class Scene_Event
       return
     end
     @phase = 8
+    @sword_step = 1
     # 尚未铸造武器
     if @actor.sword_type == -1
       text = $data_text.welcome_sword + $data_text.choose_type

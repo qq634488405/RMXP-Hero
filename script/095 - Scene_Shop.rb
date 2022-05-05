@@ -9,6 +9,7 @@ class Scene_Shop
   # ● 初始化
   #--------------------------------------------------------------------------
   def initialize(id)
+    $eat_flag = true
     @actor = $game_actor
     @id = id
     @sell_count = $data_enemies[@id].sell_count
@@ -34,7 +35,7 @@ class Scene_Shop
       @shop_window.help_window = @info_window
     when 1
       @sell_list = $data_enemies[@id].sell_item
-      @list,max_size = [],0
+      @list = []
       @sell_list.each do |i|
         case i[0]
         when 1 # 物品
@@ -44,14 +45,11 @@ class Scene_Shop
         when 3 # 装备
           name = $data_armors[i[1]].name
         end
-        max_size = name.size/3 if name.size/3 > max_size
         @list.push(name)
       end
-      @list.each_index do |i|
-        # 调整物品名称长度
-        @list[i] = @list[i] + "  "*(max_size - @list[i].size/3)
-      end
-      width = max_size * 24 + 80
+      # 调整物品名称长度
+      @list.fill_space_to_max
+      width = @list.max_length * 12 + 80
       # 生成购买窗口
       @shop_window = Window_ShopBuy.new(width,@list,@sell_list,1,3)
       @shop_window.active = true
@@ -187,7 +185,7 @@ class Scene_Shop
         # 演奏确定 SE
         $game_system.se_play($data_system.decision_se)
         @shop_window.active = false
-        @number_window.set(@item, max, @item.price)
+        @number_window.set(@item[2], @shop_window.price)
         @number_window.active = true
         @number_window.visible = true
       else # 数量为1则直接交易
@@ -236,7 +234,7 @@ class Scene_Shop
       when 0 # 当铺
         bag_id = @shop_window.bag_position
         # 获得金钱并移除物品
-        @actot.gain_gold(@shop_window.price*@number_window.number)
+        @actor.gain_gold(@shop_window.price*@number_window.number)
         # 物品减少同时判断是否该背包位置被清除
         if @actor.lose_bag_id(bag_id,@number_window.number)
           # 无货可卖则返回地图

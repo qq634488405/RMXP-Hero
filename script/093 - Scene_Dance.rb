@@ -9,6 +9,7 @@ class Scene_Dance
   # ● 主处理
   #--------------------------------------------------------------------------
   def main
+    $eat_flag = true
     @actor = $game_actor
     @count,@score = 0,0
     # 左侧PAD窗口

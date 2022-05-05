@@ -122,7 +122,7 @@ class Scene_Title
   #--------------------------------------------------------------------------
   # ● 检查武器名字
   #--------------------------------------------------------------------------
-  def check_weapon_name
+  def check_sword_name
     # 检查武器名长度
     if @password == "" or @password.new_size > 8
       print($data_system.name_error)
@@ -243,7 +243,7 @@ class Scene_Title
         when 0  # 输入武器名字
           input_password
         when 1  # 确认
-          check_weapon_name
+          check_sword_name
         end
       end
     end

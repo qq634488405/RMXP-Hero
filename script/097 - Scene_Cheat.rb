@@ -275,7 +275,11 @@ class Scene_Cheat
       $game_system.se_play($data_system.decision_se)
       # 遗忘技能
       if @category_window.index == 7
+        # 如果在最后一个技能则光标前移
+        @skill_window.index -= 1 if kf_list_id == @actor.skill_list.size-1
         @actor.skill_list.delete_at(kf_list_id)
+        # 列表为空则切换到技能目录窗口
+        return_category if @actor.skill_list.empty?
       else
         lv = [lv+5,255].min
         @actor.skill_list[kf_list_id][1] = lv

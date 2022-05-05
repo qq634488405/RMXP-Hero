@@ -193,6 +193,7 @@ class Window_Item < Window_Selectable
         text = $data_items[id].description.dup
       when 2 # 武器
         text = $data_weapons[id].description.dup
+        text += @actor.sword_font if id == 31
       when 3 # 装备
         text = $data_armors[id].description.dup
       end

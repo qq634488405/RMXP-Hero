@@ -41,6 +41,7 @@ class Game_Actor < Game_Battler
   attr_accessor :sword1                   # 铸剑前缀参数
   attr_accessor :sword2                   # 铸剑中缀参数
   attr_accessor :sword3                   # 铸剑后缀参数
+  attr_accessor :sword_font               # 铸剑前中后缀描述
   attr_accessor :sword_exp                # 铸剑经验
   attr_accessor :sword_gold               # 铸剑金钱
   attr_accessor :sword_times              # 铸剑次数
@@ -61,7 +62,7 @@ class Game_Actor < Game_Battler
     @age,@morals,@base_str,@base_agi,@base_int = 14,128,20,20,20
     @base_bon,@base_fac,@base_luc,@maxhp,@pot = 20,20,20,100,100
     @food,@water,@marry,@marry_name,@gold = 100,100,0,"",100
-    @item_bag,@play_time,@hp,@xue6 = [],0,100,false
+    @item_bag,@play_time,@hp,@xue6,@sword_font = [],0,100,false,""
     @skill_use,@badman_kill,@dance,@ball = [0,0,0,0,0,0],0,100,100
     @states,@stone_list,@kill_list,@task_kill = [],[],[],0
     @states_turn,@tan_id,@sword_battle,@sword_name = {},0,false,""
@@ -79,12 +80,15 @@ class Game_Actor < Game_Battler
   # ● 设置铸造武器属性 
   #--------------------------------------------------------------------------
   def set_sword
+    p @sword1
+    p @sword2
+    p @sword3
     return if @sword_type == -1
     # 武器名，类别
     $data_weapons[31].name = @sword_name
     $data_weapons[31].type = @sword_type
     # 攻击为前缀参数
-    $data_weapons[31].atk = @sword1
+    $data_weapons[31].add_atk = @sword1
     # 获取前缀名
     name1_id = [@sword1 / 5 , 50].min
     attr_name = $data_system.sword_name1[name1_id]
@@ -96,7 +100,7 @@ class Game_Actor < Game_Battler
     sword3_data = @sword3 % 100
     # 获取中缀名
     if sword2_type > 0
-      attr_name += $data_system.sword_name2[sword2_type][sword2_data/3]
+      attr_name += $data_system.sword_name2[sword2_type-1][sword2_data/3]
     end
     # 设置中缀属性
     if sword2_type > 2
@@ -110,7 +114,7 @@ class Game_Actor < Game_Battler
     end
     # 设置后缀名和属性
     if sword3_type > 0
-      attr_name += $data_system.sword_name3[sword3_type][sword3_data/5]
+      attr_name += $data_system.sword_name3[sword3_type-1][sword3_data/5]
       case sword3_type
       when 1 # 增加膂力
         $data_weapons[31].add_str = sword3_data
@@ -125,7 +129,7 @@ class Game_Actor < Game_Battler
       end
     end
     # 修改描述
-    $data_weapons[31].description += attr_name
+    @sword_font = attr_name
   end
   #--------------------------------------------------------------------------
   # ● 出售列表，每条数据格式[type,id,num,equip],bag_id

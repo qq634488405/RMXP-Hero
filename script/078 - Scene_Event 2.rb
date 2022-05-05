@@ -386,29 +386,103 @@ class Scene_Event
   # ● 刷新铸剑
   #--------------------------------------------------------------------------
   def update_make_sword
-    @confirm_window.visible = true
-    @confirm_window.active = true
-    @confirm_window.x=80
+    if @name_input != nil
+      if @new_name != ""
+        text = $data_system.set_weapon_name[0].deep_clone
+        text.gsub!("------",@new_name)
+        @name_input.change_item(0,text)
+      else
+        @name_input.change_item(0,$data_system.set_weapon_name[0])
+      end
+      @name_input.update 
+    end
+    if @sword_step != 3
+      @confirm_window.visible = true
+      @confirm_window.active = true
+      @confirm_window.x = @actor.sword_type == -1 ? 80 : 200
+    end
     # 按下 B 键的情况
-    if Input.trigger?(Input::B)
+    if Input.trigger?(Input::B) and @sword_step != 3
       # 回到地图
+      @name_input.dispose if @name_input != nil
       $scene=Scene_Map.new
       return
     end
     # 按下 C 键的情况
     if Input.trigger?(Input::C)
-      if @actor.sword_type == -1
-        # 选择武器类别后保存
-        @actor.sword_type = @confirm_window.index
-        @actor.input_name = true
-        show_text($data_text.sword_is_making.dup)
-        $game_temp.write_save_data
-        @confirm_window.visible = false
-        @confirm_window.active = false
-        @phase = 1
-      else
-        # 回到地图
-        $scene=Scene_Map.new
+      @confirm_window.visible = false
+      @confirm_window.active = false
+      @talk_window.visible = false
+      case @sword_step
+      when 1 # 选择类别或确认重铸
+        if @actor.sword_type == -1
+          # 选择武器类别后保存
+          @actor.sword_type = @confirm_window.index
+          @actor.input_name = true
+          show_text($data_text.sword_is_making.dup)
+          $game_temp.write_save_data
+          @phase = 1
+          return
+        else
+          case @confirm_window.index
+          when 0
+            # 获取经验和金钱要求
+            need_exp = (@actor.sword_times + 1) * 100000
+            need_gold = @actor.exp / 2
+            # 经验不足
+            if @actor.exp < need_exp
+              show_text($data_text.sword_no_exp.dup)
+              @phase = 1
+              return
+            end
+            # 金钱不足
+            if @actor.gold < need_gold
+              show_text($data_text.sword_no_gold.dup)
+              @phase = 1
+              return
+            end
+            # 装备自制武器的情况
+            if @actor.weapon_id == 31
+              show_text($data_text.sword_unequip.dup)
+              @phase = 1
+              return
+            end
+            @actor.lose_gold(need_gold)
+            # 刷新武器属性
+            refresh_sword_data
+            # 询问是否重新命名
+            show_text($data_text.rename_sword.dup)
+            @sword_step = 2
+          when 1
+            # 回到地图
+            $scene=Scene_Map.new
+          end
+        end
+      when 2 # 重新命名
+        case @confirm_window.index
+        when 0
+          @name_input = Window_Command.new(320,$data_system.set_weapon_name,1)
+          @name_input.x = 320 - @name_input.width / 2
+          @name_input.y = 240 - @name_input.height / 2
+          @new_name = ""
+          @name_input.active = true
+          @name_input.visible = true
+          @sword_step = 3
+        when 1
+          # 设置铸造武器属性
+          @actor.set_sword
+          $game_temp.write_save_data
+          # 回到地图
+          $scene=Scene_Map.new
+        end
+      when 3 # 输入名称窗口
+        # 命令窗口的光标位置的分支
+        case @name_input.index
+        when 0  # 输入武器名字
+          input_sword_name
+        when 1  # 确认
+          check_sword_name
+        end
       end
     end
   end

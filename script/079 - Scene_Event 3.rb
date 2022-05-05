@@ -400,4 +400,87 @@ class Scene_Event
       return $data_text.sword_ask.dup
     end
   end
+  #--------------------------------------------------------------------------
+  # ● 刷新铸剑属性
+  #--------------------------------------------------------------------------
+  def refresh_sword_data
+    # 计算攻击力
+    rand_factor = rand(100) # $3403
+    n = [@actor.exp,1100000].min/20000-5 # $05FC
+    c,b = n * 2,20
+    factor = cal_new_factor(n,b,c)
+    judge = Integer(rand(factor))
+    factor = cal_new_factor(19,b,c)
+    n = factor < judge ? 20 : 1
+    while cal_new_factor(n,b,c) < judge
+      n += 1
+    end
+    n = [n-1,0].max
+    n = n * 5 + rand(5)
+    @actor.sword1 = n
+    # 设置中缀
+    @actor.sword2 = 0
+    rand_factor = rand(100-rand_factor)
+    rand_factor += @actor.luck
+    n = [rand_factor - 80,40].min
+    if n >= 0
+      @actor.sword2 = n / 10 * 3 + (rand(4) + 1) * 100
+    end
+    # 设置后缀
+    @actor.sword3 = 0
+    rand_factor = rand(100-rand_factor)
+    if rand_factor >= 20
+      n = [rand_factor + @actor.luck - 40,80].min
+      if n >= 0
+        @actor.sword3 = n / 20 * 5 + (rand(5) + 1) * 100
+      end
+    end
+  end
+  #--------------------------------------------------------------------------
+  # ● 计算系数
+  #--------------------------------------------------------------------------
+  def cal_new_factor(a,b,c)
+    n = (a - 1) * a * c / 4
+    n += a * b
+    return n
+  end
+  #--------------------------------------------------------------------------
+  # ● 输入武器名称
+  #--------------------------------------------------------------------------
+  def input_sword_name
+    # 输入密码
+    text_thread=Thread.new{$game_system.input_text}
+    text_thread.exit
+    @new_name = $game_system.output_text
+    $game_system.clear_input
+  end
+  #--------------------------------------------------------------------------
+  # ● 检查武器名字
+  #--------------------------------------------------------------------------
+  def check_sword_name
+    # 检查武器名长度
+    if @new_name == "" or @new_name.new_size > 8
+      print($data_system.name_error)
+      return
+    end
+    # 检查是否与现有武器重名
+    next_step = true
+    for i in 1..30
+      if @new_name == $data_weapons[i].name
+        next_step = false
+        break
+      end
+    end
+    # 没有重名
+    if next_step
+      @actor.sword_name = @new_name
+      # 设置铸造武器属性
+      @actor.set_sword
+      $game_temp.write_save_data
+      @name_input.dispose
+      $scene = Scene_Map.new
+    else
+      print($data_system.name_error)
+    end
+  end
 end

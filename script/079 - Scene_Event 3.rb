@@ -483,4 +483,32 @@ class Scene_Event
       print($data_system.name_error)
     end
   end
+  #--------------------------------------------------------------------------
+  # ● 恢复菜单样式
+  #--------------------------------------------------------------------------
+  def resume_window_style
+    $game_system.windowskin_name = "Black.png"
+  end
+  #--------------------------------------------------------------------------
+  # ● 显示行走文本
+  #--------------------------------------------------------------------------
+  def show_walk_step
+    text = $data_text.step_success.dup
+    show_home_text(text)
+  end
+  #--------------------------------------------------------------------------
+  # ● 显示行走文本
+  #--------------------------------------------------------------------------
+  def show_direction_choose
+    text = $data_text.step_ask.dup
+    show_home_text(text)
+    @step_menu.visible = true
+    @step_menu.active = true
+  end
+  #--------------------------------------------------------------------------
+  # ● 显示黑屏文本
+  #--------------------------------------------------------------------------
+  def show_home_text(text)
+    @black_window.auto_text(text,0,@black_window.back_color)
+  end
 end

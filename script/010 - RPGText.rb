@@ -157,6 +157,20 @@ module RPG
     attr_accessor :rename_sword             # 武器重命名
     attr_accessor :sword_is_making          # 武器铸造中
     attr_accessor :sword_status             # 武器状态
+    attr_accessor :new_home_ask             # 桃花源询问
+    attr_accessor :new_home_fail            # 桃花源摔下
+    attr_accessor :new_home_top             # 桃花源到山顶
+    attr_accessor :step_ask                 # 询问方向
+    attr_accessor :step_fail                # 山顶摔倒
+    attr_accessor :step_success             # 迈出一步
+    attr_accessor :see_new_home             # 发现房屋
+    attr_accessor :welcome_home             # 山大王/老管家问候
+    attr_accessor :win_shan_king            # 战胜山大王
+    attr_accessor :room_lv_up               # 房屋翻盖成功
+    attr_accessor :room_no_gold             # 翻盖没钱
+    attr_accessor :room_max_lv              # 翻盖至最高级
+    attr_accessor :room_no_space            # 没空间放家具
+    attr_accessor :jiaju_no_gold            # 没钱买家具
     #--------------------------------------------------------------------------
     # ● 初始化对像
     #--------------------------------------------------------------------------
@@ -309,6 +323,20 @@ module RPG
       @rename_sword = ""
       @sword_is_making = ""
       @sword_status = ""
+      @new_home_ask = ""
+      @new_home_fail = []
+      @new_home_top = ""
+      @step_ask = ""
+      @step_fail = ""
+      @step_success = ""
+      @see_new_home = ""
+      @welcome_home = []
+      @win_shan_king = ""
+      @room_lv_up = ""
+      @room_no_gold = ""
+      @room_max_lv = ""
+      @room_no_space = ""
+      @jiaju_no_gold = ""
     end
   end
 end

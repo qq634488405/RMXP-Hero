@@ -26,7 +26,7 @@ class Game_Actor < Game_Battler
   attr_accessor :water                    # 饮水
   attr_accessor :max_food                 # 食物最大值
   attr_accessor :max_water                # 饮水最大值
-  attr_accessor :marry                    # 结婚标志0-单身，1-已婚
+  attr_accessor :marry                    # 结婚标志0--单身
   attr_accessor :marry_name               # 对象名字
   attr_accessor :item_bag                 # 背包
   attr_accessor :stone_list               # 已获得石板NPC列表
@@ -51,6 +51,7 @@ class Game_Actor < Game_Battler
   attr_accessor :donate_times             # 捐款次数
   attr_accessor :tan_id                   # 坛任务序号
   attr_accessor :xue6                     # 雪花六出标志
+  attr_accessor :have_new_home            # 桃花源标志
   #--------------------------------------------------------------------------
   # ● 初始化对像
   #--------------------------------------------------------------------------
@@ -68,7 +69,7 @@ class Game_Actor < Game_Battler
     @states_turn,@tan_id,@sword_battle,@sword_name = {},0,false,""
     @sword_times,@sword_type,@sword1,@sword2,@sword3 = 0,-1,0,0,0
     @sword_exp,@sword_gold,@kill_num = 0,0,0
-    @donate_times = 0
+    @donate_times,@have_new_home = 0,false
   end
   #--------------------------------------------------------------------------
   # ● 获取角色 ID 
@@ -80,9 +81,6 @@ class Game_Actor < Game_Battler
   # ● 设置铸造武器属性 
   #--------------------------------------------------------------------------
   def set_sword
-    p @sword1
-    p @sword2
-    p @sword3
     return if @sword_type == -1
     # 武器名，类别
     $data_weapons[31].name = @sword_name

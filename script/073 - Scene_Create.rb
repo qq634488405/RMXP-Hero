@@ -75,7 +75,7 @@ class Scene_Create
   # ● 检查姓名长度
   #--------------------------------------------------------------------------
   def check_name_size
-    if @actor.name.new_size > 10 or @actor.name == ""
+    if @actor.name.new_size > 8 or @actor.name == ""
       $game_system.se_play($data_system.buzzer_se)
       print($data_system.name_error)
       @actor.name=""
@@ -152,7 +152,7 @@ class Scene_Create
     if Input.trigger?(Input::C)
       # 出错退出标志
       quit_flag=false
-      quit_flag=true if @actor.name.size>10 or @actor.name==""
+      quit_flag=true if @actor.name.new_size>8 or @actor.name==""
       # 检查密码长度
       if $word.new_size>18
         print($data_system.long_pas)

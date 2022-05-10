@@ -134,6 +134,9 @@ class Window_Selectable < Window_Base
           bitmap = [RPG::Cache.picture("Rect_Unselected.png"),
                     RPG::Cache.picture("Rect_Unselected_Equiped.png")]
           self.contents.blt(a_off,b+4,bitmap[0],Rect.new(0,0,20,24),255)
+        when 6 # 空白圆形反色
+          bitmap = RPG::Cache.picture("GBall_Unselected.png")
+          self.contents.blt(a_off,b+4,bitmap,Rect.new(0,0,20,24),255)
         end
         self.contents.draw_text(rect, @commands[index],@align)
         break
@@ -189,6 +192,9 @@ class Window_Selectable < Window_Base
       @new_command.set_size(@width_txt,32)
       @new_command.set_up(16+x+self.x,16+y+self.y,@commands[@index])
       @new_command.update
+    when 6 # 圆形选择框反色
+      bitmap = RPG::Cache.picture("GBall_Selected.png")
+      self.contents.blt(x_off, y+4,bitmap,Rect.new(0, 0, 20, 24),255)
     end
   end
   #--------------------------------------------------------------------------

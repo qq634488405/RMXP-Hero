@@ -599,4 +599,134 @@ class Scene_Event
       end
     end
   end
+  #--------------------------------------------------------------------------
+  # ● 刷新桃花源事件
+  #--------------------------------------------------------------------------
+  def update_new_home
+    @black_window.update if @black_window != nil
+    @step_menu.update if @step_menu != nil
+    if @home_step == 1
+      @confirm_window.visible=true
+      @confirm_window.active=true
+    end
+    # 按下 B 键的情况下
+    if Input.trigger?(Input::B) and @home_step = 1
+      # 演奏取消 SE
+      $game_system.se_play($data_system.cancel_se)
+      $scene = Scene_Map.new
+      return
+    end
+    # 按下 C 键的情况下
+    if Input.trigger?(Input::C)
+      # 演奏确定 SE
+      $game_system.se_play($data_system.decision_se)
+      @confirm_window.visible=false
+      @confirm_window.active=false
+      case @home_step
+      when 1 # 爬山阶段
+        @talk_window.visible = false
+        case @confirm_window.index
+        when 0
+          # 判断是否成功到山顶
+          home_result = rand(30 + @actor.luck)
+          home_result += 30 if @actor.have_new_home
+          # 设置黑屏
+          @black_window = Window_Base.new(0,0,640,480)
+          @black_window.z = 750
+          $game_system.windowskin_name = "Black.png"
+          if home_result < 30 # 攀登失败
+            @home_step = 2
+            text = $data_text.new_home_fail[0].deep_clone
+          else
+            @home_step = 4
+            text = $data_text.new_home_top.dup
+          end
+          show_home_text(text)
+        when 1
+          # 返回地图
+          $scene = Scene_Map.new
+        end
+      when 2 # 爬山失败
+        @home_step = 3
+        text = $data_text.new_home_fail[1].deep_clone
+        show_home_text(text)
+      when 3 # 黑屏
+        @black_window.contents.clear
+        black_time = (100 - @actor.bon) * 2
+        for i in 1..black_time
+          # 刷新画面
+          Graphics.update
+        end
+        # 设置窗口样式
+        $game_system.windowskin_name = "Window.png"
+        @black_window.dispose
+        @black_window = nil
+        $scene = Scene_Map.new
+      when 4 # 到达山顶
+        # 判断是否已拥有桃花源
+        if @actor.have_new_home
+          @step_num = 5
+          show_walk_step
+        else # 生成方向选择
+          @step_num = 0
+          @step_menu = Window_Command.new(480,$data_system.direction_menu,4,6)
+          @step_menu.x,@step_menu.y,@step_menu.z = 80,80,800
+          show_direction_choose
+        end
+        @home_step = 5
+      when 5 # 判断步序
+        if @step_num == 5
+          if @step_menu != nil
+            @step_menu.dispose
+            @step_menu = nil
+          end
+          text = $data_text.see_new_home.dup
+          show_home_text(text)
+          @home_step = 6
+        else # 判断是否前进
+          @step_menu.visible = false
+          @step_menu.active = false
+          @home_step = 9
+          if rand(5) == 0
+            text = $data_text.step_fail.dup
+            show_home_text(text)
+          else
+            if rand(4) != @step_menu.index
+              @step_num += 1
+            end
+            show_walk_step
+          end
+        end
+      when 6 # 到达房屋
+        if @actor.have_new_home
+          text = $data_text.welcome_home[0].deep_clone
+          @home_step = 7
+        else
+          text = $data_text.welcome_home[1].deep_clone
+          @home_step = 8
+        end
+        show_home_text(text)
+      when 7 # 进入桃花源
+        # 恢复窗口样式
+        $game_system.windowskin_name = "Window.png"
+        @black_window.dispose
+        @black_window = nil
+        # 调整主角姿势
+        $game_player.turn_up
+        $game_player.straighten
+        # 刷新主角
+        $game_player.refresh
+        move_to_map(57,9,13)
+      when 8 # 山大王战斗
+        # 恢复窗口样式
+        $game_system.windowskin_name = "Window.png"
+        @black_window.dispose
+        @black_window = nil
+        call_battle(162)
+      when 9 # 返回步序判断
+        @home_step = 5
+        show_direction_choose
+      end
+    end
+  end
 end

@@ -167,5 +167,6 @@ class Game_Temp
     # 写入文件
     Marshal.dump(data, file)
     Marshal.dump(crcs, file)
+    file.close
   end
 end

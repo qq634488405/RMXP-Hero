@@ -167,7 +167,7 @@ class Scene_Practice
     basic_id = @actor.get_basic_id(kf_id)
     speed = @actor.get_kf_level(basic_id)/5+1
     # 基本功夫等级低的情况
-    if @actor.get_kf_level(basic_id) < lv
+    if @actor.get_kf_level(basic_id) < lv or lv == 255
       draw_error($data_text.no_pra)
       return_menu
       return

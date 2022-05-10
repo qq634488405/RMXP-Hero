@@ -23,6 +23,7 @@ class Scene_Event
   #           12--联机
   #           13--跳转地图，id--地图ID，number--入口ID
   #           14--铸剑
+  #           15--桃花源
   #--------------------------------------------------------------------------
   def initialize(type,id=0,number=1)
     $eat_flag = true
@@ -89,13 +90,15 @@ class Scene_Event
         @confirm_window.y=416
       end
       make_sword
+    when 15 # 桃花源
+      get_new_home
     end
     if @confirm_window == nil
       @confirm_window=Window_Command.new(240,$data_system.confirm_choice,2,3)
       @confirm_window.y=416
     end
-    @confirm_window.z=800
     @confirm_window.x=200
+    @confirm_window.z=800
     @confirm_window.visible=false
     @confirm_window.active=false
     # 主循环
@@ -149,6 +152,8 @@ class Scene_Event
       update_make_sword
     when 9 # 自杀
       update_kill_self
+    when 10 # 刷新桃花源
+      update_new_home
     end
     # 刷新活动块
     @screen.update
@@ -399,11 +404,25 @@ class Scene_Event
     # 获取坐标
     x_y = $data_tasks.tan_map_xy[@id]
     x,y = x_y[@number][0],x_y[@number][1]
+    move_to_map(@id,x,y)
+  end
+  #--------------------------------------------------------------------------
+  # ● 桃花源
+  #--------------------------------------------------------------------------
+  def get_new_home
+    show_text($data_text.new_home_ask)
+    @phase = 10
+    @home_step = 1
+  end
+  #--------------------------------------------------------------------------
+  # ● 移动至指定地图位置
+  #--------------------------------------------------------------------------
+  def move_to_map(id,x,y)
     # 播放移动SE
     $game_system.se_play($data_system.move_se)
     $scene = Scene_Map.new
     # 设置主角的移动目标
-    $game_map.setup(@id)
+    $game_map.setup(id)
     $game_player.moveto(x,y)
     $game_map.autoplay
     # 准备过渡
@@ -418,7 +437,7 @@ class Scene_Event
   def make_sword
     # 如果有待命名的武器
     if @actor.input_name
-      show_text($data_text.hava_sword)
+      show_text($data_text.have_sword)
       @phase = 1
       return
     end

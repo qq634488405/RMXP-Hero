@@ -43,8 +43,9 @@ class Window_Command < Window_Selectable
   #--------------------------------------------------------------------------
   def refresh
     self.contents.clear
+    color = @type == 6 ? back_color : normal_color
     for i in 0...@item_max
-      draw_item(i, normal_color)
+      draw_item(i, color)
     end
   end
   #--------------------------------------------------------------------------

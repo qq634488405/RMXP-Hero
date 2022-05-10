@@ -298,4 +298,17 @@ class Game_Enemy < Game_Battler
     # 更新数据
     set_up
   end
+  #--------------------------------------------------------------------------
+  # ● 全回复
+  #--------------------------------------------------------------------------
+  def recover_all
+    @maxhp = @full_hp
+    @hp = @maxhp
+    @fp = @maxfp
+    @mp = @maxmp
+    for i in @states.clone
+      remove_state(i)
+    end
+    clear_temp_data
+  end
 end

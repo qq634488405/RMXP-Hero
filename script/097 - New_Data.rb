@@ -575,6 +575,8 @@ end
     $data_system.cheat_status = ["金钱","经验","潜能","内力","法力","名声","杀手","捕快","屠杀","性别","容貌","福缘","年龄","时间","跳舞","投篮",]
     $data_system.cheat_skill = ["拳脚","兵刃","轻功","内功","招架","法术","知识","遗忘"]
     $data_system.fly_menu=["平安镇","商家堡","玉女峰","五指山","冰火岛","武当山","大雪山","长白山","茅山"]
+    $data_system.direction_menu=["东","南","西","北"]
+    $data_system.master_menu=["翻盖","家具","销毁"]
     # 轻功目的地，地图ID，X,Y,朝向
     $data_system.fly_position=[[3,8,6,2],[29,9,13,8],[23,15,28,8],[24,8,11,8],[37,9,9,8],[26,12,10,8],[42,10,13,8],[53,12,6,8],[51,1,6,6]]
     $data_system.chara_set = ["请选择您的人物：","姓名：","密码：","确认"]
@@ -1144,6 +1146,21 @@ end
                             66=>[[5,2]]}
     $data_tasks.sword_weapon=[8,15,25,21]
     $data_text=RPG::Text.new
+    $data_text.new_home_ask="这座山巍峨灵秀，似乎就是传说中的武陵源桃花源山，要冒险一探究竟吗？"
+    $data_text.new_home_fail=["你奋不顾身的向上爬去，结果手一滑，你绝望地发出一声惨叫，从山上摔了下来。","你的眼前一黑，接着什么也不知道了……"]
+    $data_text.new_home_top="你奋力向上爬去，费了九牛二虎之力，总算爬上了山顶。"
+    $data_text.step_ask="山顶银妆素裹，放眼望去，映入眼帘的都是一片白色。\n这里明显的出口是："
+    $data_text.step_fail="你战战兢兢地迈出了一步，结果一不小心滑倒在地。"
+    $data_text.step_success="你小心翼翼地地向前走着，背后留下一连串的脚印……"
+    $data_text.see_new_home="你的眼前忽然一亮，只见前面有一个山谷，远远望去，谷中一片绿色，你不由得加快了脚步。"
+    $data_text.welcome_home=["远远看见一个人跑了过来，到近处一看是老管家，他三步并两步，嘴里也没闲着，总算把您盼回来了，我先给您预备茶去……",
+                             "突然从路边跳出一个人，嘴里大喝一声，哪里来的兔崽子，跑到我家里来了，拿命来！"]
+    $data_text.win_shan_king="山大王跪地求饶，愿意让出山谷作为你的住所，并为你当管家。"
+    $data_text.room_lv_up="翻盖成功，请出去看看。"
+    $data_text.room_no_gold="翻修需要200两金子。"
+    $data_text.room_max_lv="你的房子已经是最高级的了。"
+    $data_text.room_no_space="你已经放了number件家具，现在房间太窄了！"
+    $data_text.jiaju_no_gold="你没钱买家具了。"
     $data_text.have_sword="你已经有一个了，别太贪心了。"
     $data_text.welcome_sword="欢迎来到铸剑谷！"
     $data_text.choose_type = "你想要铸造什么兵器？"

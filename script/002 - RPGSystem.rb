@@ -55,6 +55,8 @@ module RPG
     attr_accessor :cheat_skill              # 作弊技能菜单
     attr_accessor :fly_menu                 # 轻功菜单
     attr_accessor :fly_position             # 轻功地点
+    attr_accessor :direction_menu           # 方向菜单
+    attr_accessor :master_menu              # 老管家菜单
     attr_accessor :chara_set                # 设定人物
     attr_accessor :input_pas                # 输入密码
     attr_accessor :weapon_title             # 输入武器名字提示
@@ -128,6 +130,8 @@ module RPG
       @cheat_skill = []
       @fly_menu = []
       @fly_position = []
+      @direction_menu = []
+      @master_menu = []
       @chara_set = []
       @input_pas = []
       @have_pas = ""

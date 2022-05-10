@@ -249,8 +249,29 @@ class Scene_Battle
         $scene = Scene_Gameover.new
         return
       else
-        # 切换到地图画面
-        $scene = Scene_Map.new
+        # 山大王挑战胜利则转移至桃花源
+        if @enemy.id == 162
+          # 播放移动SE
+          $game_system.se_play($data_system.move_se)
+          $scene = Scene_Map.new
+          # 调整主角姿势
+          $game_player.turn_up
+          $game_player.straighten
+          # 刷新主角
+          $game_player.refresh
+          # 设置主角的移动目标
+          $game_map.setup(57)
+          $game_player.moveto(9,13)
+          $game_map.autoplay
+          # 准备过渡
+          Graphics.freeze
+          # 设置过渡处理中标志
+          $game_temp.transition_processing = true
+          $game_temp.transition_name = ""
+        else
+          # 切换到地图画面
+          $scene = Scene_Map.new
+        end
       end
     end
   end
@@ -291,6 +312,15 @@ class Scene_Battle
         @msg_window.visible = true
         return
       end
+    end
+    # 山大王挑战胜利
+    if @enemy.id == 162
+      @actor.have_new_home = true
+      # 显示对话
+      @msg_window.auto_text($data_text.win_shan_king.dup)
+      @msg_window.visible = true
+      @phase5_step = 4
+      return
     end
     @msg_window.y = 0
     # 询问劈不劈

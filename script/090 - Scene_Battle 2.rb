@@ -236,7 +236,7 @@ class Scene_Battle
       skill = @kf_window.skill
       id,equip = skill[0],skill[3]
       # 基本功夫和知识的情况
-      if id < 12 or @kf_window.index == 6
+      if id < 12 or @type_window.index == 6
         $game_system.se_play($data_system.buzzer_se)
         return
       end

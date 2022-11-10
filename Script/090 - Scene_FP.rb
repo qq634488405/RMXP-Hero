@@ -140,7 +140,7 @@ class Scene_FP
     end
     # 调整帧率
     Graphics.frame_rate = 120
-    if @actor.fp * 100 / @actor.maxfp > 180 and @actor.maxfp >= @actor.full_fp
+    if @actor.fp * 100 / [@actor.maxfp,1].max > 180 and @actor.maxfp >= @actor.full_fp
       Graphics.frame_rate = 40
     end
     # 计算打坐速率

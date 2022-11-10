@@ -20,7 +20,23 @@ class Scene_Battle
   def update_phase2
     # 设置行动
     if @enemy.movable?
-      common_attack(@enemy)
+      # 判断是否使用绝招
+      if $data_system.npc_sp_skill[@enemy.id] != nil and rand(100) < 50
+        # 获取可用绝招ID，并随机设定使用的绝招
+        sp_list = $data_system.npc_sp_skill[@enemy.id]
+        @skill_id = sp_list[rand(sp_list.size)]
+        # 判断绝招是否可用
+        result = @enemy.skill_can_use?(@skill_id,@actor)
+        # 可用则转入绝招使用否则普通攻击
+        if result[0]
+          start_phase3(@enemy)
+          return
+        else
+          common_attack(@enemy)
+        end
+      else
+        common_attack(@enemy)
+      end
     else
       text = $data_text.cannot_move.dup
       text.gsub!("user",@enemy.name)
@@ -85,11 +101,11 @@ class Scene_Battle
       text = user.get_kf_action(1)
       text = replace_text(text,user,user_name,target_name)
     when 2 # 招架
-      t = user.weapon_id == 0 ? $data_system.hand_def : $data_system.weapon_def
+      t = user.weapon_id <= 0 ? $data_system.hand_def : $data_system.weapon_def
       text = t[rand(t.size)].deep_clone
       text.gsub!("user",user_name)
     when 3 # 影分身
-      text = $data_text.sp_def.dup
+      text = $data_system.sp_def.dup
       text.gsub!("user",user_name)
     end
     return text

@@ -35,7 +35,7 @@ class Game_Battler
       add_state(2,turns)
       add_cd_time(2,turns)
       add_state(0,2)
-      @states_add[2] = [[1,get_kf_efflv(12) / 15],[5,get_kf_efflv(13) * 2 / 15]]
+      @states_add[2] = [[1,get_kf_efflv(13) / 15],[5,get_kf_efflv(13) * 2 / 15]]
       return [0]
     when 3 # 八卦刀影掌
       # 记录冷却时间，附加状态
@@ -46,9 +46,10 @@ class Game_Battler
       # 附加状态，记录附加属性，记录冷却时间
       @hit_plus += 10
       @str_plus += get_kf_efflv(13) / 9
-      add_state(3,1)
+      add_state(4,1)
       add_cd_time(4,7)
       add_state(0,3)
+      @states_add[4] = [[1,10],[5,get_kf_efflv(13) / 9]]
       return [1,[13,2,-1,-1],[14,1,-1]]
     when 5 # 柳浪闻莺
       # 记录冷却时间，附加状态
@@ -64,6 +65,8 @@ class Game_Battler
         if rand(self.agi) >= target.agi / 3
           # 目标是玩家则还要从背包中删除武器
           if target.is_a?(Game_Actor)
+            # 若为铸造武器，则清空铸造武器信息
+            clear_sword if target.weapon_id == 31
             bag_id = target.get_item_index(2,target.weapon_id,1)
             target.lose_bag_id(bag_id)
           end
@@ -124,6 +127,8 @@ class Game_Battler
       # 移除武器
       # 使用者是玩家则还要从背包中删除武器
       if self.is_a?(Game_Actor)
+        # 若为铸造武器，则清空铸造武器信息
+        clear_sword if @weapon_id == 31
         bag_id = get_item_index(2,@weapon_id,1)
         lose_bag_id(bag_id)
       end
@@ -141,9 +146,9 @@ class Game_Battler
       # 附加状态，记录附加属性，记录冷却时间
       turns = get_kf_efflv(26)/20
       @hit_plus += get_kf_efflv(26)/9
-      add_state(9,turns)
+      add_state(10,turns)
       add_state(0,1)
-      add_cd_time(9,turns)
+      add_cd_time(10,turns)
       @states_add[10] = [[5,get_kf_efflv(26)/9]]
       return [0]
     when 11 # 旋风三连斩

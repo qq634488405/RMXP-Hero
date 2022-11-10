@@ -152,13 +152,46 @@ class Scene_Practice
         return_menu
         return
       end
+      return unless check_lv_exp_fp
       @phase = 2
     end
+  end
+  #--------------------------------------------------------------------------
+  # ● 检查等级、经验、内力
+  #--------------------------------------------------------------------------
+  def check_lv_exp_fp
+    lv = @actor.get_kf_level(kf_id)
+    basic_id = @actor.get_basic_id(kf_id)
+    # 基本功夫等级低的情况
+    if @actor.get_kf_level(basic_id) < lv or lv == 255
+      draw_error($data_text.no_pra)
+      return_menu
+      return false
+    end
+    # 检查经验是否充足
+    unless @actor.check_kf_exp(kf_id)
+      draw_error($data_text.learn_no_exp)
+      return_menu
+      return false
+    end
+    # 判断内力上限是否足够
+    if @actor.maxfp < @actor.get_kf_efflv(kf_id)*10
+      draw_error($data_text.pra_no_fp)
+      return_menu
+      return false
+    end
+    return true
   end
   #--------------------------------------------------------------------------
   # ● 刷新练功画面
   #--------------------------------------------------------------------------
   def update_practice
+    # 按下 B 键的情况
+    if Input.trigger?(Input::B)
+      $game_system.se_play($data_system.cancel_se)
+      return_menu
+      return
+    end
     # 调整帧率
     Graphics.frame_rate = 120
     lv = @actor.get_kf_level(kf_id)
@@ -166,30 +199,6 @@ class Scene_Practice
     point_max = (lv + 1)**2
     basic_id = @actor.get_basic_id(kf_id)
     speed = @actor.get_kf_level(basic_id)/5+1
-    # 基本功夫等级低的情况
-    if @actor.get_kf_level(basic_id) < lv or lv == 255
-      draw_error($data_text.no_pra)
-      return_menu
-      return
-    end
-    # 检查经验是否充足
-    unless @actor.check_kf_exp(kf_id)
-      draw_error($data_text.learn_no_exp)
-      return_menu
-      return
-    end
-    # 判断内力上限是否足够
-    if @actor.maxfp < @actor.get_kf_efflv(kf_id)*10
-      draw_error($data_text.pra_no_fp)
-      return_menu
-      return
-    end
-    # 按下 B 键的情况
-    if Input.trigger?(Input::B)
-      $game_system.se_play($data_system.cancel_se)
-      return_menu
-      return
-    end
     # 描绘进度
     @info.visible = true
     @actor.skill_list[kf_pos][2] += speed
@@ -200,6 +209,7 @@ class Scene_Practice
       @actor.skill_list[kf_pos][1] += 1
       @actor.skill_list[kf_pos][2] = 0
       draw_error($data_text.sk_lv_up)
+      check_lv_exp_fp
     end
   end
   #--------------------------------------------------------------------------

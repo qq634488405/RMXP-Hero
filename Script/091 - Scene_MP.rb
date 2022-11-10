@@ -136,7 +136,7 @@ class Scene_MP
     end
     # 调整帧率
     Graphics.frame_rate = 120
-    if @actor.mp * 100 / @actor.maxmp > 180 and @actor.maxmp >= @actor.full_mp
+    if @actor.mp * 100 / [@actor.maxmp,1].max > 180 and @actor.maxmp >= @actor.full_mp
       Graphics.frame_rate = 40
     end
     # 计算冥思速率

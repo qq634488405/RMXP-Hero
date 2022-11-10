@@ -95,7 +95,7 @@ class Game_Battler
     end
     attr1 = [attr1,0].max
     # 经验加成
-    exp_power = @exp/100
+    exp_power = @exp / 100
     exp_power /= 2 if attr1 == 0
     total = (attr1 ** 3 / 300 + exp_power) * attr2 / 100
     return total

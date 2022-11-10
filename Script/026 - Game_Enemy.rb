@@ -66,11 +66,13 @@ class Game_Enemy < Game_Battler
   #--------------------------------------------------------------------------
   def item_list
     n = []
+    n.push([2,@weapon_id]) if @weapon_id != 0
     n.push(@item1) if @item1[0]>0
+    # 如果是坛主，则将地图优先级提前
+    n.reverse! if n.size == 2 and (id > 162 and id < 171)
     n.push(@item2) if @item2[0]>0
     n.push(@item3) if @item3[0]>0
     n.push(@item4) if @item4[0]>0
-    n.push([2,@weapon_id]) if @weapon_id>0
     return n
   end
   #--------------------------------------------------------------------------
@@ -109,7 +111,7 @@ class Game_Enemy < Game_Battler
   #--------------------------------------------------------------------------
   def equip_str
     n = 0
-    weapon = $data_weapons[@weapon_id]
+    weapon = @weapon_id > 0 ? $data_weapons[@weapon_id] : nil
     n += weapon != nil ? weapon.add_str : 0
     for i in 1..4
       armor = $data_armors[equip_list[i]]
@@ -122,7 +124,7 @@ class Game_Enemy < Game_Battler
   #--------------------------------------------------------------------------
   def equip_agi
     n = 0
-    weapon = $data_weapons[@weapon_id]
+    weapon = @weapon_id > 0 ? $data_weapons[@weapon_id] : nil
     n += weapon != nil ? weapon.add_agi : 0
     for i in 1..4
       armor = $data_armors[equip_list[i]]
@@ -135,7 +137,7 @@ class Game_Enemy < Game_Battler
   #--------------------------------------------------------------------------
   def equip_int
     n = 0
-    weapon = $data_weapons[@weapon_id]
+    weapon = @weapon_id > 0 ? $data_weapons[@weapon_id] : nil
     n += weapon != nil ? weapon.add_int : 0
     for i in 1..4
       armor = $data_armors[equip_list[i]]
@@ -148,7 +150,7 @@ class Game_Enemy < Game_Battler
   #--------------------------------------------------------------------------
   def equip_bon
     n = 0
-    weapon = $data_weapons[@weapon_id]
+    weapon = @weapon_id > 0 ? $data_weapons[@weapon_id] : nil
     n += weapon != nil ? weapon.add_bon : 0
     for i in 1..4
       armor = $data_armors[equip_list[i]]
@@ -161,7 +163,7 @@ class Game_Enemy < Game_Battler
   #--------------------------------------------------------------------------
   def equip_fac
     n = 0
-    weapon = $data_weapons[@weapon_id]
+    weapon = @weapon_id > 0 ? $data_weapons[@weapon_id] : nil
     n += weapon != nil ? weapon.add_fac : 0
     for i in 1..4
       armor = $data_armors[equip_list[i]]
@@ -174,7 +176,7 @@ class Game_Enemy < Game_Battler
   #--------------------------------------------------------------------------
   def equip_hit
     n = 0
-    weapon = $data_weapons[@weapon_id]
+    weapon = @weapon_id > 0 ? $data_weapons[@weapon_id] : nil
     n += weapon != nil ? weapon.add_hit : 0
     for i in 1..4
       armor = $data_armors[equip_list[i]]
@@ -187,7 +189,7 @@ class Game_Enemy < Game_Battler
   #--------------------------------------------------------------------------
   def equip_eva
     n = 0
-    weapon = $data_weapons[@weapon_id]
+    weapon = @weapon_id > 0 ? $data_weapons[@weapon_id] : nil
     n += weapon != nil ? weapon.add_eva : 0
     for i in 1..4
       armor = $data_armors[equip_list[i]]
@@ -200,7 +202,7 @@ class Game_Enemy < Game_Battler
   #--------------------------------------------------------------------------
   def equip_atk
     n = 0
-    weapon = $data_weapons[@weapon_id]
+    weapon = @weapon_id > 0 ? $data_weapons[@weapon_id] : nil
     n += weapon != nil ? weapon.add_atk : 0
     for i in 1..4
       armor = $data_armors[equip_list[i]]
@@ -213,24 +215,11 @@ class Game_Enemy < Game_Battler
   #--------------------------------------------------------------------------
   def equip_def
     n = 0
-    weapon = $data_weapons[@weapon_id]
+    weapon = @weapon_id > 0 ? $data_weapons[@weapon_id] : nil
     n += weapon != nil ? weapon.add_def : 0
     for i in 1..4
       armor = $data_armors[equip_list[i]]
       n += armor != nil ? armor.add_def : 0
-    end
-    return [n,255].min
-  end
-  #--------------------------------------------------------------------------
-  # ● 获取装备附加膂力
-  #--------------------------------------------------------------------------
-  def equip_str
-    n = 0
-    weapon = $data_weapons[@weapon_id]
-    n += weapon != nil ? weapon.add_str : 0
-    for i in 1..4
-      armor = $data_armors[equip_list[i]]
-      n += armor != nil ? armor.add_str : 0
     end
     return [n,255].min
   end

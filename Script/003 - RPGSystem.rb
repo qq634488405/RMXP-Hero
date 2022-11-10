@@ -86,6 +86,7 @@ module RPG
     attr_accessor :throw_ball_bgm           # 投篮BGM
     attr_accessor :create_bgm               # 创建人物BGM
     attr_accessor :move_se                  # 切换地图SE
+    attr_accessor :npc_sp_skill             # NPC可用绝招
     #--------------------------------------------------------------------------
     # ● 初始化对像
     #--------------------------------------------------------------------------
@@ -165,6 +166,7 @@ module RPG
       @throw_ball_bgm = RPG::AudioFile.new
       @create_bgm = RPG::AudioFile.new
       @move_se = RPG::AudioFile.new
+      @npc_sp_skill = {}
     end
   end
 end

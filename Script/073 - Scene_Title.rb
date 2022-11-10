@@ -272,7 +272,7 @@ class Scene_Title
     $game_player.turn_down
     $game_player.straighten
     # 卸下所有装备
-    $game_actor.unequip_all
+    $game_actor.unequip_all if $keep_equip == 0
     $game_actor.check_item_bag
     $game_actor.check_stone_list
     # 兼容旧版存档

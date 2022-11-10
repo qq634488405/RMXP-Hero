@@ -179,12 +179,15 @@ class Scene_Event
   #--------------------------------------------------------------------------
   def task_talk
     @talk_step = 3
-    # 村长，坛任务未开始，经验超过80000，且背包未满
-    if @id==6 and @actor.tan_id==0 and @actor.exp>=80000 and not @actor.full_item_bag?
-      @actor.tan_id=1
-      # 获得青龙坛地图
-      @actor.gain_item(1,21)
-      return $data_text.tan_start
+    # 村长，经验超过80000，且背包未满触发XX坛除恶任务
+    if @id==6 and @actor.exp>=80000 and not @actor.full_item_bag?
+      # 任务未开始或者青龙坛未打但地图丢失则获得青龙坛地图
+      if @actor.tan_id==0 or (@actor.tan_id==1 and @actor.item_number(1,21)==0)
+        @actor.tan_id = 1
+        # 获得青龙坛地图
+        @actor.gain_item(1,21)
+        return $data_text.tan_start
+      end
     end
     # 平一指且玩家为好人
     return $data_text.no_kill_task if @id==26 and @actor.morals>=128
@@ -391,8 +394,8 @@ class Scene_Event
   # ● 干匠对话
   #--------------------------------------------------------------------------
   def sword_talk
-    # 经验不足150000返回nil，常规对话
-    return nil if @actor.exp < 150000
+    # 墨邪死亡或经验不足150000返回nil，常规对话
+    return nil if @actor.kill_list.include?(149) or @actor.exp < 150000
     # 已完成铸剑挑战
     if @actor.sword_battle
       @talk_step = 5
@@ -417,8 +420,7 @@ class Scene_Event
     while cal_new_factor(n,b,c) < judge
       n += 1
     end
-    n = [n-1,0].max
-    n = n * 5 + rand(5)
+    n = [n,0].max * 5 + rand(5)
     @actor.sword1 = n
     # 设置中缀
     @actor.sword2 = 0

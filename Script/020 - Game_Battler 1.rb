@@ -170,7 +170,7 @@ class Game_Battler
   # ● 获取使用兵刃ID
   #--------------------------------------------------------------------------
   def weapon_kf_id
-    return 0 if @weapon_id == 0
+    return 0 if @weapon_id <= 0
     n = @skill_use[1]
     n = weapon_basic_kf if not weapon_match_kf?
     return n
@@ -209,7 +209,7 @@ class Game_Battler
   # ● 武器是否与兵刃功夫匹配
   #--------------------------------------------------------------------------
   def weapon_match_kf?
-    return false if @skill_use[1] == 0
+    return false if @skill_use[1] == 0 or @weapon_id <= 0
     n = $data_kungfus[@skill_use[1]].type - 3
     return ($data_weapons[@weapon_id].type == n)
   end
@@ -217,13 +217,13 @@ class Game_Battler
   # ● 招架是否与攻击功夫匹配
   #--------------------------------------------------------------------------
   def parry_match_atk?
-    if @weapon_id>0
+    if @weapon_id > 0
       n = 1
       return false if not weapon_match_kf?
     else
       n = 0
     end
-    return (@skill_use[n]==@skill_use[4])
+    return (@skill_use[n] == @skill_use[4])
   end
   #--------------------------------------------------------------------------
   # ● 获取指定ID功夫对应基本功夫ID
@@ -276,7 +276,7 @@ class Game_Battler
   def attack_kf_lv
     n = 0
     # 空手则+拳脚有效等级
-    if @weapon_id == 0 
+    if @weapon_id <= 0 
       n += hand_kf_lv
     else
       # 装备武器的情况+兵刃有效等级
@@ -316,7 +316,7 @@ class Game_Battler
     # +基本招架等级/2
     n += get_kf_level(10)/2
     # 空手的情况
-    if @weapon_id == 0
+    if @weapon_id <= 0
       # 招架与拳脚匹配则+使用拳脚等级
       n += parry_match_atk? ? get_kf_level(skill) : 0
     else

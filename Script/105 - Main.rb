@@ -23,7 +23,7 @@ end
 font_file=["/Font/wqx-16.ttf","/Font/wqx-12.ttf"]
 font_test=["Font/wqx-16.ttf","Font/wqx-12.ttf"]
 font_name=["WQX16","WQX12"]
-dll_name="RGSS103J"
+dll_name="Gmud"
 for i in 0..1
   # 字体未安装且存在字体文件则进行安装
   if not Font.exist?(font_name[i]) and FileTest.exist?(font_test[i])
@@ -77,8 +77,17 @@ end
 $battle_info = 0
 ini_info.each do |i|
   # 读取BUFF效果显示
-  if i["BuffEffect="] == "BuffEffect="
+  if i["BattleEffect="] == "BattleEffect="
     $battle_info = i[/\d/].to_i
+    break
+  end
+end
+# 进入游戏不卸装备
+$keep_equip = 0
+ini_info.each do |i|
+  # 读取装备保留设定
+  if i["KeepEquip="] == "KeepEquip="
+    $keep_equip = i[/\d/].to_i
     break
   end
 end

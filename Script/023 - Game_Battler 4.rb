@@ -154,7 +154,7 @@ class Game_Battler
           if Integer(rand(self.damage)) > target.pdef
             hurt_num = self.damage - target.pdef
             # 没装备武器概率受伤
-            if self.weapon_id == 0
+            if self.weapon_id <= 0
               hurt_num = 0 if rand(4) != 0
             end
           end

@@ -32,7 +32,7 @@ class Window_BattleStatus < Window_Base
       draw_status(@actor,i)
       draw_status(@enemy,i)
     end
-    draw_buff if $battle_info == 1
+    draw_buff if $battle_info != 0
   end
   #--------------------------------------------------------------------------
   # ● 描绘状态
@@ -95,8 +95,8 @@ class Window_BattleStatus < Window_Base
   #--------------------------------------------------------------------------
   def draw_buff
     battlers = [@actor,@enemy]
-    text,y = "",0
     battlers.each_index do |i|
+      text,y = "",128
       b_type=[battlers[i].str_plus,battlers[i].dex_plus,battlers[i].int_plus,
               battlers[i].bon_plus,battlers[i].hit_plus,battlers[i].eva_plus,
               battlers[i].atk_plus,battlers[i].def_plus,]
@@ -106,8 +106,8 @@ class Window_BattleStatus < Window_Base
           num_text = b_type[j].to_s
           num_text = "+" + num_text if b_type[j] > 0
           text = $data_system.attr_name[j] + num_text
-          self.contents.draw_text(i*480,y,128,32,text)
-          y += 32
+          self.contents.draw_text(40+i*456,y,64,16,text)
+          y -= 16
         end
       end
     end

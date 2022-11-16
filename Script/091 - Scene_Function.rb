@@ -134,7 +134,8 @@ class Scene_Function
         # 存档
         $game_temp.write_save_data
         @phase = 2
-        @msg_window.visible=true
+        @func_window.active = false
+        @msg_window.visible = true
         # 演奏存档 SE
         $game_system.se_play($data_system.save_se)
       when 4 # 结束

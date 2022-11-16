@@ -253,6 +253,10 @@ class Scene_Map
   def call_fly
     # 清除调用轻功标志
     $game_temp.fly_calling = false
+    # 检查轻功设定及是否位于室外
+    if $fly_in == 0 and not $game_map.is_outside?
+      return
+    end
     # 演奏确定 SE
     $game_system.se_play($data_system.decision_se)
     # 切换到轻功画面

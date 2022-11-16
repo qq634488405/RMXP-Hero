@@ -111,6 +111,10 @@ class Game_Task
     @stone_start=false
     exp = @actor.exp/1500+40
     pot = exp/2
+    if $fast_mode != 0
+      exp *= 3
+      pot *= 3
+    end
     return give_reward(exp,pot,-1)
   end
   #--------------------------------------------------------------------------
@@ -135,7 +139,13 @@ class Game_Task
     reward = 200*(index+1)/a
     reward *= (1+cal_log10(@actor.exp/10000))
     reward *= (@actor.exp*task_exp)/((@actor.exp+task_exp)**2)
-    reward = [reward+rand(@actor.int)+rand(@actor.luck),200].min
+    reward += rand(@actor.int)+rand(@actor.luck)
+    if $fast_mode != 0
+      reward *= (100 + rand(@actor.luck) * 2 / 5)
+      reward /= 50
+    else
+      reward = [reward,200].min
+    end
     # 保存任务信息
     case type
     when 1 # 拜访
@@ -212,7 +222,13 @@ class Game_Task
       @wanted_count = 1
     end
     # 生成奖励数据
+    min_lv = @actor.get_min_efflv / 3 * 2
     @wanted_reward = (80 + rand(80))*(@wanted_count+@wanted_turn-1)
+    if $fast_mode != 0
+      reward_n = Integer(rand(min_lv)) + rand(@actor.luck)
+      @wanted_reward *= (200 + reward_n * 100 / 250)
+      @wanted_reward /= 100
+    end
     # 生成恶人数据
     class_id=rand(8)+1
     # 姓名,类型,性别,年龄,命中,闪避,攻击,防御,经验,加力,法点,道德,膂力,敏捷,
@@ -224,7 +240,7 @@ class Game_Task
     # 命中，闪避，攻击，防御，经验，加力，先天膂力，先天敏捷，先天悟性，
     # 先天根骨，先天相貌，先天福源，生命上限，内力上限，法力上限，法点
     # 复制玩家属性，经验，生命，内力，法力进行折算
-    percent = 70+5*@wanted_count+5*@wanted_turn
+    percent = [70+5*@wanted_count+5*@wanted_turn,125].min
     @wanted_data.base_hit = @actor.hit
     @wanted_data.base_eva = @actor.eva
     @wanted_data.base_atk = @actor.atk
@@ -251,6 +267,7 @@ class Game_Task
     @wanted_data.mp = @wanted_data.maxmp
     @wanted_data.morals,@wanted_data.full_hp = 0,@wanted_data.maxhp
     bad_data = $data_tasks.bad_data[class_id]
+    bad_data[6] = rand(3) + 52 if class_id == 8
     @wanted_data.weapon_id = bad_data[0]
     @wanted_data.skill_use = [bad_data[1],bad_data[2],bad_data[3],bad_data[4],
                               bad_data[5],bad_data[6]]

@@ -1,10 +1,10 @@
 #==============================================================================
-# ■ Scene_Title
+# ■ Scene_Begin
 #------------------------------------------------------------------------------
 # 　处理标题画面的类。
 #==============================================================================
 
-class Scene_Title
+class Scene_Begin
   #--------------------------------------------------------------------------
   # ● 主处理
   #--------------------------------------------------------------------------
@@ -24,8 +24,8 @@ class Scene_Title
     $data_common_events = load_data("Data/CommonEvents.rxdata")
     $data_mapinfos      = load_data("Data/MapInfos.rxdata")
     # 载入数据库
-    if FileTest.exist?("Data/GmudData.dat")
-      load_gmud_data
+    result = load_gmud_data
+    if result[0]
       $game_system=Game_System.new
       # 载入存档
       if FileTest.exist?("Save/Gmud.sav")
@@ -42,7 +42,7 @@ class Scene_Title
         $scene=Scene_Scroll.new(1)
       end
     else
-      print("数据库丢失，请重新安装游戏。")
+      print(result[1])
       $scene = nil
     end
   end
@@ -50,31 +50,45 @@ class Scene_Title
   # ● 读取数据库文件
   #--------------------------------------------------------------------------
   def load_gmud_data
-    file = File.open("Data/GmudData.dat","rb")
-    # 读取数据字串
-    data = Marshal.load(file)
-    crcs = Marshal.load(file)
+    # 设置数据库文件列表
+    file_list = $data_system.file_list
+    npc_file = ["Data/GmudEnemy.dat","Data/GmudEnemyPlus.dat"]
+    file_list[5] = npc_file[$npc_plus]
+    # 检查文件是否存在，存在则读取
+    data,crcs,result = [],[],[true]
+    file_list.each do |i|
+      if FileTest.exist?(i)
+        file = File.open(i,"rb")
+        # 读取数据字串
+        data.push(Marshal.load(file))
+        crcs.push(Marshal.load(file))
+        file.close
+      else
+        result = [false,"数据库丢失，请重新下载游戏。"]
+        break
+      end
+    end
+    # 检查文件存在标志
+    return result unless result[0]
     # 数据校验
     key = 9527
     data.each_index do |i|
-      key = Zlib.crc32(data[i],key)
-      unless crcs[i] == key
-        file.close
-        print("数据库损坏，请重新安装！")
-        $scene = nil
+      unless crcs[i] == Zlib.crc32(data[i],key)
+        result=[false,"数据库损坏，请重新下载！"]
+        break
       end
     end
-    file.close
+    # 检查数据校验结果
+    return result unless result[0]
     # 解压数据
     $data_kungfus = Marshal.load(Zlib::Inflate.inflate(data[0]))
     $data_skills  = Marshal.load(Zlib::Inflate.inflate(data[1]))
-    $data_system  = Marshal.load(Zlib::Inflate.inflate(data[2]))
-    $data_items   = Marshal.load(Zlib::Inflate.inflate(data[3]))
-    $data_weapons = Marshal.load(Zlib::Inflate.inflate(data[4]))
-    $data_armors  = Marshal.load(Zlib::Inflate.inflate(data[5]))
-    $data_enemies = Marshal.load(Zlib::Inflate.inflate(data[6]))
-    $data_tasks   = Marshal.load(Zlib::Inflate.inflate(data[7]))
-    $data_text    = Marshal.load(Zlib::Inflate.inflate(data[8]))
+    $data_items   = Marshal.load(Zlib::Inflate.inflate(data[2]))
+    $data_weapons = Marshal.load(Zlib::Inflate.inflate(data[3]))
+    $data_armors  = Marshal.load(Zlib::Inflate.inflate(data[4]))
+    $data_enemies = Marshal.load(Zlib::Inflate.inflate(data[5]))
+    $data_tasks   = Marshal.load(Zlib::Inflate.inflate(data[6]))
+    return [true]
   end
   #--------------------------------------------------------------------------
   # ● 输入密码

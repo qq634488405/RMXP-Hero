@@ -60,37 +60,6 @@ for i in 0..1
     Win32API.new("user32","ReleaseDC","ll","v").call(0, dc)
   end
 end
-# 按行读取配置文件
-file = File.open("Gmud.ini")
-ini_info = file.readlines
-file.close
-# 设置色彩模式：0--黑白，1--灰度。默认黑白
-$color_mode = 0
-ini_info.each do |i|
-  # 读取色彩设置
-  if i["Color="] == "Color="
-    $color_mode = i[/\d/].to_i
-    break
-  end
-end
-# 战斗BUFF显示，默认不显示
-$battle_info = 0
-ini_info.each do |i|
-  # 读取BUFF效果显示
-  if i["BattleEffect="] == "BattleEffect="
-    $battle_info = i[/\d/].to_i
-    break
-  end
-end
-# 进入游戏不卸装备
-$keep_equip = 0
-ini_info.each do |i|
-  # 读取装备保留设定
-  if i["KeepEquip="] == "KeepEquip="
-    $keep_equip = i[/\d/].to_i
-    break
-  end
-end
 begin
   # 准备过渡
   # 设置系统默认字体

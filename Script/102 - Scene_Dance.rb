@@ -19,8 +19,7 @@ class Scene_Dance
     # 右侧人物窗口
     @right_window = Window_Base.new(320,96,320,384)
     # 设置四个方向人物图
-    @char_pic = @actor.character_name
-    @char_pic = Bitmap.new("Graphics/Characters/"+@char_pic)
+    @char_pic = RPG::Cache.character(@actor.character_name,@actor.character_hue)
     cw = @char_pic.rect.width / 4
     ch = @char_pic.rect.height / 4
     @up_char = Rect.new(3*cw,3*ch,cw,ch)
@@ -29,7 +28,7 @@ class Scene_Dance
     @down_char = Rect.new(0,0,cw,ch)
     @last_char = @down_char
     # 方向箭头
-    @dir_pic = Bitmap.new("Graphics/Pictures/Dir")
+    @dir_pic = RPG::Cache.picture("Dir.png")
     # 执行过渡
     Graphics.transition
     # 主循环
@@ -144,7 +143,7 @@ class Scene_Dance
       @char_status_count -= 1
     end
     # 描绘角色状态
-    char_list = [@last_char,@left_char,@up_char,@down_char,@right_char]
+    char_list = [@last_char,@up_char,@left_char,@down_char,@right_char]
     @right_window.contents.blt(144,175,@char_pic,char_list[@char_status])
   end
   #--------------------------------------------------------------------------

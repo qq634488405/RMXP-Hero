@@ -124,6 +124,19 @@ class Game_Actor < Game_Battler
     @skill_use[type] = skill_list[id][0] if @skill_list[id][3] == 1
   end
   #--------------------------------------------------------------------------
+  # ● 获取最低功夫有效等级
+  #--------------------------------------------------------------------------
+  def get_min_efflv
+    n = [attack_kf_lv,parry_kf_lv]
+    # 逍遥派轻功不计入
+    n.push(dodge_kf_lv) if @class_id != 9
+    # 兽王茅山内功不计入
+    n.push(fp_kf_lv) unless [7,8].include?(@class_id)
+    # 茅山法术计入
+    n.push(mp_kf_lv) if @class_id == 8
+    return n.min
+  end
+  #--------------------------------------------------------------------------
   # ● 更改 EXP
   #     exp : 新的 EXP
   #--------------------------------------------------------------------------

@@ -224,26 +224,21 @@ class Game_Battler
   def check_magic_require(skill_id,magic_data)
     return [true] if magic_data.empty?
     # 检查法术等级
-    if mp_kf_lv >= magic_data[1]
-      return [true]
-    else
+    if mp_kf_lv < magic_data[1]
       text = $data_text.sp_no_lv.dup
       text.gsub!("skill",$data_kungfus[mp_kf_id].name)
       return [false,text]
     end
     # 检查法力
     mp_cost = [@mp_plus*2+100,get_mp_cost(skill_id)].max
-    if @mp >= mp_cost
-      return [true]
-    else
+    if @mp < mp_cost
       return [false,$data_text.sp_no_mp.dup]
     end
     # 检查生命
-    if @hp >= $data_skills[skill_id].hp_cost
-      return [true]
-    else
+    if @hp < $data_skills[skill_id].hp_cost
       return [false,$data_text.sp_no_hp.dup]
     end
+    return [true]
   end
   #--------------------------------------------------------------------------
   # ● 检查状态
@@ -280,16 +275,16 @@ class Game_Battler
       # 非增加回合的情况
       if plus == 0
         # 更新持续时间
-        @states_turn[state_id] = [turns,@states_turn[state_id]].max
+        @states_turn[state_id] = [turns + 1,@states_turn[state_id]].max
       else
         # 增加持续时间
-        @states_turn[state_id] += turns
+        @states_turn[state_id] += turns + 1
       end
       return
     else
       # 新增状态及持续时间
       @states.push(state_id)
-      @states_turn[state_id] = turns
+      @states_turn[state_id] = turns + 1
     end
   end
   #--------------------------------------------------------------------------
@@ -297,7 +292,7 @@ class Game_Battler
   #--------------------------------------------------------------------------
   def add_cd_time(id,turns)
     @cool_down.push(id)
-    @cd_turns[id] = turns
+    @cd_turns[id] = turns + 1
   end
   #--------------------------------------------------------------------------
   # ● CD自然冷却 (回合改变时调用)
@@ -306,8 +301,8 @@ class Game_Battler
     for i in @cd_turns.keys.clone
       if @cd_turns[i] > 0
         @cd_turns[i] -= 1
-        remove_cd_time(i) if @cd_turns[i] == 0
       end
+      remove_cd_time(i) if @cd_turns[i] <= 0
     end
   end
   #--------------------------------------------------------------------------
@@ -370,12 +365,10 @@ class Game_Battler
       # 铸造武器状态则跳过
       next if [-4,-5].include?(i)
       # 持续回合减一
-      if @states_turn[i] > 0
-        @states_turn[i] -= 1
-        if @states_turn[i] == 0
-          remove_state(i)
-          removed.push(i) if i > 0
-        end
+      @states_turn[i] -= 1 if @states_turn[i] > 0
+      if @states_turn[i] == 0
+        remove_state(i)
+        removed.push(i) if i > 0
       end
     end
     return removed

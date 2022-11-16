@@ -95,7 +95,7 @@ class Scene_Event
     # 计算当前游戏时间
     time = Graphics.frame_count/Graphics.frame_rate
     # 已有恶人的情况
-    if $game_task.wanted_place>0
+    if $game_task.wanted_place > 0
       # 任务时间少于20分钟
       if time-$game_task.wanted_time<1200
         talk = $data_text.bad_undo_text.dup
@@ -106,8 +106,9 @@ class Scene_Event
         return set_new_badman
       end
     else
-      # 距离上次任务不足5分钟
-      if time-$game_task.wanted_time<300
+      # 距离上次任务不足5分钟(快速模式减半)
+      cd_time = $fast_mode != 0 ? 150 : 300
+      if time - $game_task.wanted_time < cd_time
         return $data_text.no_bad_task
       else
         # 发布恶人任务
@@ -122,10 +123,11 @@ class Scene_Event
     @talk_step = 3
     # 计算当前游戏时间
     time = Graphics.frame_count/Graphics.frame_rate
+    cd_time = $fast_mode != 0 ? 90 : 180
     # 根据石料任务状态赋予对话
     if $game_task.stone_start == true
       talk = $data_text.stone_undo_text
-    elsif time-$game_task.stone_time < 180
+    elsif time-$game_task.stone_time < cd_time
       talk = $data_text.no_stone_task
     elsif @actor.exp<1000
       talk = $data_text.stone_less_exp

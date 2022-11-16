@@ -10,7 +10,7 @@ module RPG
     # ● 加载Bitmap，根据色彩模式选择不同目录
     #--------------------------------------------------------------------------
     def self.load_bitmap(folder_name, filename, hue = 0)
-      folder_name += "Gray/" if $color_mode == 1
+      folder_name += "Gray/" if $color_mode != 0
       path = folder_name + filename
       if not @cache.include?(path) or @cache[path].disposed?
         if filename != ""

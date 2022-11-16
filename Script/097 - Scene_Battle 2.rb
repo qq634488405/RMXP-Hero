@@ -405,4 +405,86 @@ class Scene_Battle
       start_phase3(@actor)
     end
   end
-end  
+  #--------------------------------------------------------------------------
+  # ● 生成NPC行动列表
+  #--------------------------------------------------------------------------
+  def make_enemy_action
+    action_id = 0
+    if $npc_plus != 0
+      # 受伤超过50%使用生肌膏
+      while @enemy.maxhp * 100 / @enemy.full_hp < 50 and @enemy.drug2_num > 0
+        @enemy.use_drug(2)
+        action_id = 1
+      end
+      # 受伤超过25%使用金疮药
+      while @enemy.maxhp * 100 / @enemy.full_hp < 75 and @enemy.drug1_num > 0
+        @enemy.use_drug(1)
+        action_id = 1
+      end
+      # 使用了金创药/生肌膏
+      if action_id > 0
+        text = $data_text.net_item.dup
+        text.gsub!("target",@enemy.name)
+        show_text(text)
+        # 刷新状态窗口
+        @status_window.update
+      end
+      hp_hurt = (@enemy.maxhp - @enemy.hp) * 100 / @enemy.maxhp
+      # 装备门派内功且内力≥20，根据已损失血量概率吸气
+      if rand(100) < hp_hurt and @enemy.fp_kf_id >12 and @enemy.fp >= 20
+        # 计算内力消耗
+        hp_num = @enemy.maxhp - @enemy.hp
+        fp_cost = hp_num*20/(10+@enemy.fp_kf_lv/15)+1
+        if fp_cost > @enemy.fp # 内力不足以恢复满
+          fp_cost = @enemy.fp
+          @enemy.hp += fp_cost*(10+@enemy.fp_kf_lv/15)/20
+        else # 恢复满
+          @enemy.hp = @enemy.maxhp
+        end
+        # 扣除内力消耗
+        @enemy.fp -= fp_cost
+        action_id = 2
+      end
+      # 进行吸气
+      if action_id > 1
+        text = $data_text.hp_recover.dup
+        text.gsub!("你",@enemy.name)
+        show_text(text)
+        # 刷新状态窗口
+        @status_window.update
+      end
+      # 判断是否可行动
+      if @enemy.movable?
+        # 50%概率使用绝招，且存在可以使用的绝招
+        sp_list = @enemy.skill_is_ready(@actor)
+        if rand(100) < 50 and not sp_list.empty?
+          @skill_id = sp_list[rand(sp_list.size)]
+          action_id = @enemy.skill_judge(@skill_id,@actor) ? 300 + @skill_id : 4
+        else
+          # 普通攻击
+          action_id = 4
+        end
+      else # 呆若木鸡
+        action_id = 5
+      end
+    else
+      if @enemy.movable?
+        # 判断是否使用绝招
+        if $data_system.npc_sp_skill[@enemy.id] != nil and rand(100) < 50
+          # 获取可用绝招ID，并随机设定使用的绝招
+          sp_list = $data_system.npc_sp_skill[@enemy.id]
+          @skill_id = sp_list[rand(sp_list.size)]
+          # 判断绝招是否可用
+          result = @enemy.skill_can_use?(@skill_id,@actor)
+          # 可用则转入绝招使用否则普通攻击
+          action_id = result[0] ? 300 + @skill_id : 4
+        else
+          action_id = 4
+        end
+      else
+        action_id = 5
+      end
+    end
+    return action_id
+  end
+end

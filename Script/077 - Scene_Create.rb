@@ -15,7 +15,7 @@ class Scene_Create
     @actor=$game_actor
     # 生成窗口
     @sprite = Sprite.new
-    @sprite.bitmap = Bitmap.new("Graphics/Pictures/BG.png")
+    @sprite.bitmap = RPG::Cache.picture("BG.png")
     @sprite.x = 0
     @sprite.y = 0
     @create_window = Window_Create.new

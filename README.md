@@ -10,7 +10,10 @@ RMXP版英雄坛说
 
 
 #### 使用说明
-将Script文件夹内*.rb脚本合并为RMXP的Script.rxdata，并放入RMXP英雄坛说Data文件夹内
+1.使用第三方工具
+将Script文件夹内*.rb脚本合并为RMXP的Script.rxdata，推荐使用Gemini Script Editor，并放入RMXP英雄坛说Data文件夹内。
+2.使用RPG Maker XP
+双击Gmud.rxproj即可进行各项编辑，以此法打开的脚本没有数据生成脚本，需要将New_Data脚本插入到Main前，建议把数据库生成和游戏本体分开。
 
 
 #### 关于数据库

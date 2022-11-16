@@ -335,7 +335,7 @@ class Scene_Event
           @map_name.update
         end
       end
-      talk = $game_task.give_reward(20,10,50)
+      talk = $fast_mode == 0 ? $game_task.give_reward(20,10,50) : $game_task.give_reward(100,50,250)
       show_text(talk)
       # 播放奖励音效
       $game_system.se_play($data_system.actor_collapse_se)

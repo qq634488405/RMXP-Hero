@@ -26,7 +26,7 @@ class Scene_Scroll
       @audio_file = $data_system.end_bgm
     end
     @sprite = Sprite.new
-    @sprite.bitmap = Bitmap.new("Graphics/Pictures/BG.png")
+    @sprite.bitmap = RPG::Cache.picture("BG.png")
     @sprite.x = 0
     @sprite.y = 0
     # 生成标题栏

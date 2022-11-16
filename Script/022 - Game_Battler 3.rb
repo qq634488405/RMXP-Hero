@@ -46,7 +46,7 @@ class Game_Battler
       # 附加状态，记录附加属性，记录冷却时间
       @hit_plus += 10
       @str_plus += get_kf_efflv(13) / 9
-      add_state(4,1)
+      add_state(4,0)
       add_cd_time(4,7)
       add_state(0,3)
       @states_add[4] = [[1,10],[5,get_kf_efflv(13) / 9]]
@@ -66,7 +66,7 @@ class Game_Battler
           # 目标是玩家则还要从背包中删除武器
           if target.is_a?(Game_Actor)
             # 若为铸造武器，则清空铸造武器信息
-            clear_sword if target.weapon_id == 31
+            target.clear_sword if target.weapon_id == 31
             bag_id = target.get_item_index(2,target.weapon_id,1)
             target.lose_bag_id(bag_id)
           end
@@ -104,7 +104,7 @@ class Game_Battler
       return [0]
     when 8 # 流星飞掷
       @hit_plus += 15
-      add_state(8,1)
+      add_state(8,0)
       add_cd_time(8,9)
       states_add[8] = [[1,15]]
       # 计算命中、闪避参数
@@ -159,7 +159,7 @@ class Game_Battler
       @hit_plus += 15
       @atk_plus += get_kf_efflv(29)/3+20
       add_cd_time(12,7)
-      add_state(12,1)
+      add_state(12,0)
       add_state(0,1)
       @states_add[12] = [[1,15],[3,get_kf_efflv(29)/3+20]]
       return [1,[29,1,-1]]
@@ -243,7 +243,7 @@ class Game_Battler
       if (not target.movable? or rand(5) == 0)
         @hit_plus += 15
         @str_plus += get_kf_efflv(32)/5
-        add_state(18,1)
+        add_state(18,0)
         add_state(0,3)
         add_cd_time(18,7)
         @states_add[18] = [[1,15],[5,get_kf_efflv(32)/5]]
@@ -288,7 +288,7 @@ class Game_Battler
       return [0]
     when 21 # 三环套月
       @atk_plus += get_kf_efflv(33)/5
-      add_state(21,1)
+      add_state(21,0)
       add_state(0,3)
       add_cd_time(21,6)
       @states_add[21] = [[3,get_kf_efflv(33)/5]]
@@ -310,7 +310,7 @@ class Game_Battler
       return [0,text]
     when 23 # 雪花六出
       @hit_plus += 10
-      add_state(23,1)
+      add_state(23,0)
       add_state(0,3)
       add_cd_time(23,10)
       @states_add[23] = [[1,10]]

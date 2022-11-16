@@ -195,6 +195,9 @@ class Window_Selectable < Window_Base
     when 6 # 圆形选择框反色
       bitmap = RPG::Cache.picture("GBall_Selected.png")
       self.contents.blt(x_off, y+4,bitmap,Rect.new(0, 0, 20, 24),255)
+    when 7 # 手指选择
+      bitmap = RPG::Cache.picture("Hand.png")
+      self.contents.blt(x, y+3,bitmap,Rect.new(0, 0, 28, 26),255)
     end
   end
   #--------------------------------------------------------------------------

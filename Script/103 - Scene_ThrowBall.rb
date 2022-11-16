@@ -15,7 +15,7 @@ class Scene_ThrowBall
     # 设置球坐标
     @ball1_x,@ball2_x,@ball2_y = 119,155,215
     # 获取角色图
-    @char_pic = Bitmap.new("Graphics/Characters/"+@actor.character_name)
+    @char_pic = RPG::Cache.character(@actor.character_name,@actor.character_hue)
     ch = @char_pic.rect.height / 4
     cw = @char_pic.rect.width / 4
     @right_char = Rect.new(3*cw,2*ch,cw,ch)

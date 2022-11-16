@@ -12,6 +12,7 @@ module RPG
     #--------------------------------------------------------------------------
     # ● 定义实例变量
     #--------------------------------------------------------------------------
+    attr_accessor :file_list                # 数据库文件列表
     attr_accessor :falv_factor              # 法术等级系数
     attr_accessor :sword_hurt               # 铸剑毒伤
     attr_accessor :fire_hurt                # 法术火伤
@@ -87,11 +88,13 @@ module RPG
     attr_accessor :create_bgm               # 创建人物BGM
     attr_accessor :move_se                  # 切换地图SE
     attr_accessor :npc_sp_skill             # NPC可用绝招
+    attr_accessor :outside_map              # 室外地图
     #--------------------------------------------------------------------------
     # ● 初始化对像
     #--------------------------------------------------------------------------
     def initialize
       super
+      @file_list = []
       @sword_hurt = ""
       @fire_hurt = ""
       @thunder_hurt = ""
@@ -167,6 +170,7 @@ module RPG
       @create_bgm = RPG::AudioFile.new
       @move_se = RPG::AudioFile.new
       @npc_sp_skill = {}
+      @outside_map = []
     end
   end
 end

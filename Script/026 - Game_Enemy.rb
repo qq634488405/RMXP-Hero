@@ -46,7 +46,7 @@ class Game_Enemy < Game_Battler
     @des_text,@exp,@gold = enemy.des_text,enemy.exp,enemy.gold
     @battler_name,@name = enemy.battler_name,enemy.name
     @battler_hue,@maxhp = enemy.battler_hue,enemy.maxhp
-    @weapon_id = enemy.weapon_id
+    @weapon_id,@drugs = enemy.weapon_id,[4,2]
   end
   #--------------------------------------------------------------------------
   # ● 设置新的敌人
@@ -299,5 +299,81 @@ class Game_Enemy < Game_Battler
       remove_state(i)
     end
     clear_temp_data
+  end
+  #--------------------------------------------------------------------------
+  # ● 金疮药数量
+  #--------------------------------------------------------------------------
+  def drug1_num
+    return @drugs[0]
+  end
+  #--------------------------------------------------------------------------
+  # ● 生肌膏数量
+  #--------------------------------------------------------------------------
+  def drug2_num
+    return @drugs[1]
+  end
+  #--------------------------------------------------------------------------
+  # ● 使用药品
+  #--------------------------------------------------------------------------
+  def use_drug(type)
+    item_id = type + 7
+    item_effect(item_id)
+    @drugs[type-1] -= 1
+  end
+  #--------------------------------------------------------------------------
+  # ● 可以使用的绝招
+  #--------------------------------------------------------------------------
+  def skill_is_ready(target)
+    n = []
+    return n if skills.empty?
+    skills.each do |i|
+      # 连珠雷，三昧火，火风暴，暴风雪，冰凌剑不对玩家使用
+      next if [32,35,36,39,40].include?(i)
+      result = skill_can_use?(i,target)
+      n.push(i) if result[0]
+    end
+    return n
+  end
+  #--------------------------------------------------------------------------
+  # ● 判断是否使用绝招
+  #--------------------------------------------------------------------------
+  def skill_judge(skill_id,target)
+    # 根据绝招判断是否使用
+    case skill_id
+    when 6 # 落英缤纷
+      # 目标有武器判断敏捷
+      if target.weapon_id > 0
+        result = agi * 3 / 2
+        judge = target.agi
+      else # 未装备武器
+        result = get_kf_efflv(19) * 3 / 2
+        judge = target.dodge_kf_lv
+      end
+    when 13,15,16,17 # 忍术烟幕，震字诀，挤字诀，乱环诀
+      result = @fp * 3 / 2
+      judge = target.fp
+    when 19 # 缠字诀
+      result = @exp * 3 / 2
+      judge = target.exp
+    when 22 # 神倒鬼跌
+      result = @fp
+      judge = target.fp
+    when 25 # 恶虎啸
+      result = fp_kf_lv * 10
+      judge = target.maxfp
+    when 29,30,31,33,34,37,38 # 闪光弹/雷火弹/掌心雷/火焰球/烈焰球/寒冰弹/雾棱镖
+      sp_skill = $data_skills[skill_id]
+      # 获取法术数据
+      m_data = sp_skill.magic_data
+      m_hit,m_damage = m_data[2],m_data[3]
+      result = @mp >= target.fp * 8 / 10 ? magic_hit(target,m_hit) : 0
+      judge = 50
+    else
+      result = 100
+      judge = 0
+    end
+    # 自身血量低时孤注一掷(不含恶虎啸)
+    result *= 2 if @hp *100 / full_hp < 30 and skill_id != 25
+    return result > judge ? true : false
   end
 end

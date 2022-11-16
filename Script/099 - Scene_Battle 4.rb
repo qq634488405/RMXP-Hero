@@ -6,207 +6,141 @@
 
 class Scene_Battle
   #--------------------------------------------------------------------------
-  # ● 开始NPC命令回合
+  # ● 开始使用绝招
   #--------------------------------------------------------------------------
-  def start_phase2
-    # 转移到回合 2
-    @phase = 2
-    # 敌人状态改变
-    @enemy_states_refresh = true
+  def start_phase3(user)
+    # 转移到回合 3
+    @phase = 3
+    hide_main_menu
+    case @skill_id
+    when 32,36,40
+      @using_flag = true
+      use_magic(user,@skill_id)
+    else
+      use_skill(user,@skill_id)
+    end
   end
   #--------------------------------------------------------------------------
-  # ● 刷新画面 (NPC命令回合)
+  # ● 刷新画面 (绝招回合)
   #--------------------------------------------------------------------------
-  def update_phase2
-    # 设置行动
-    if @enemy.movable?
-      # 判断是否使用绝招
-      if $data_system.npc_sp_skill[@enemy.id] != nil and rand(100) < 50
-        # 获取可用绝招ID，并随机设定使用的绝招
-        sp_list = $data_system.npc_sp_skill[@enemy.id]
-        @skill_id = sp_list[rand(sp_list.size)]
-        # 判断绝招是否可用
-        result = @enemy.skill_can_use?(@skill_id,@actor)
-        # 可用则转入绝招使用否则普通攻击
-        if result[0]
-          start_phase3(@enemy)
-          return
-        else
-          common_attack(@enemy)
-        end
-      else
-        common_attack(@enemy)
+  def update_phase3
+    step,n_phase = @phase3_step[0],@phase3_step[1]
+    combo = @phase3_step[2] if @phase3_step[2] != nil
+    target = @phase3_step[3] if @phase3_step[3] != nil
+    case step
+    when 1 # 进入下一回合
+      update_phase3_next(n_phase)
+    when 2 # 刷新连招
+      update_phase3_combo(n_phase,combo)
+    when 3 # 刷新法术连招
+      update_phase3_magic(n_phase,combo)
+    when 4 # 刷新连续文本
+      update_phase3_text(n_phase,combo,target)
+    end
+  end
+  #--------------------------------------------------------------------------
+  # ● 刷新画面 (下一回合)
+  #--------------------------------------------------------------------------
+  def update_phase3_next(n_phase)
+    if n_phase == 1
+      start_phase1
+    elsif n_phase == 2
+      start_phase2
+    end
+  end
+  #--------------------------------------------------------------------------
+  # ● 刷新画面 (连招)
+  #--------------------------------------------------------------------------
+  def update_phase3_combo(n_phase,combo)
+    # 根据n_phase设定使用者和目标
+    case n_phase
+    when 1
+      user = @enemy
+    when 2
+      user = @actor
+    end
+    # 获取当前连招
+    combo_act = combo[@combo_id]
+    kf_id,max_times = combo_act[0],combo_act[1]
+    act_id = combo_act[2+@combo_times[@combo_id]]
+    # 进行普通攻击
+    common_attack(user,kf_id,act_id)
+    @combo_times[@combo_id] += 1
+    # 如果已达当前连招最大次数，则进行下一连招
+    if @combo_times[@combo_id] == max_times
+      @combo_id += 1
+      # 如果下一连招为空则进入下一回合
+      if combo[@combo_id] == nil
+        @phase3_step = [1,n_phase]
       end
-    else
-      text = $data_text.cannot_move.dup
-      text.gsub!("user",@enemy.name)
-      show_text(text)
-    end
-    # 进入玩家回合
-    start_phase1
-  end
-  #--------------------------------------------------------------------------
-  # ● 普通攻击
-  #--------------------------------------------------------------------------
-  def common_attack(user,kf_id = 0,act_id = -1)
-    # 设置目标
-    t_arr = set_target(user)
-    target,user_name,target_name,n_phase = t_arr[0],t_arr[1],t_arr[2],t_arr[3]
-    # 获取攻击位置
-    id = rand($data_system.hit_place.size)
-    @atk_pos = $data_system.hit_place[id].deep_clone
-    # 获取攻击招式
-    if kf_id > 0
-      atk_text = user.get_kf_id_action(kf_id,act_id)
-    else
-      atk_text = user.get_kf_action(0)
-    end
-    atk_text = replace_text(atk_text,user,user_name,target_name)
-    # 显示攻击文本
-    show_text(atk_text)
-    # 应用普通攻击效果
-    hit_para = user.attack_effect(target)
-    damage,hit_type,hurt_num = hit_para[0],hit_para[1],hit_para[2]
-    # 伤害为字符串，即未命中的情况
-    if damage.is_a?(String)
-      eva_result = damage.split(".")
-      text = get_eva_text(eva_result[1].to_i,target,@atk_pos)
-      # 播放闪避音效
-      $game_system.se_play($data_system.enemy_collapse_se)
-      show_text(text)
-    else # 造成伤害
-      target.hp = [target.hp - damage, 0].max
-      target.maxhp = [target.maxhp - hurt_num, 0].max
-      text = get_hit_text(damage,hit_type,hurt_num,target)
-      # 应用吸血大法效果
-      xi_lv = user.get_kf_level(56)
-      user.hp = [user.hp+xi_lv*damage/100,user.maxhp].min
-      @msg_window.auto_text(text)
-      @msg_window.visible = true
-      # 播放击中动画
-      target.animation_id = 1
-      target.animation_hit = true
-      @wait_count = 18
     end
   end
   #--------------------------------------------------------------------------
-  # ● 获取闪避文本，user为轻功使用者，即被攻击者
+  # ● 刷新画面 (法术连招)
   #--------------------------------------------------------------------------
-  def get_eva_text(type,user,pos)
-    # 设置目标
-    t_arr = set_target(user)
-    target,user_name,target_name,n_phase = t_arr[0],t_arr[1],t_arr[2],t_arr[3]
-    case type
-    when 1 # 轻功闪避
-      text = user.get_kf_action(1)
-      text = replace_text(text,user,user_name,target_name)
-    when 2 # 招架
-      t = user.weapon_id <= 0 ? $data_system.hand_def : $data_system.weapon_def
-      text = t[rand(t.size)].deep_clone
-      text.gsub!("user",user_name)
-    when 3 # 影分身
-      text = $data_system.sp_def.dup
-      text.gsub!("user",user_name)
+  def update_phase3_magic(n_phase,combo)
+    # 根据n_phase设定使用者和目标
+    case n_phase
+    when 1
+      user = @enemy
+      target = @actor
+    when 2
+      user = @actor
+      target = @enemy
     end
-    return text
-  end
-  #--------------------------------------------------------------------------
-  # ● 获取伤害文本
-  #--------------------------------------------------------------------------
-  def get_hit_text(damage,type,hurt,target)
-    # 设置目标
-    if target.is_a?(Game_Actor)
-      target_name = "你"
+    # 如果下一法术为空则进入下一回合
+    if combo[@combo_id] == nil
+      @using_flag = false
+      @phase3_step = [1,n_phase]
     else
-      target_name = target.name
-    end
-    # 获取伤害文本
-    if damage == 0
-      text1 = $data_system.no_damage.deep_clone
-    else
-      text1 = $data_system.hit_word[type][damage_index(damage)].deep_clone
-    end
-    # 根据是否受伤获取状态文本
-    if hurt > 0
-      percent = target.maxhp * 100 / target.full_hp
-      text2 = $data_system.in_hurt[hp_index(percent)].deep_clone
-    else
-      percent = target.hp * 100 / target.full_hp
-      text2 = $data_system.out_hurt[hp_index(percent)].deep_clone
-    end
-    text = text1 + text2
-    text.gsub!("target",target_name)
-    return text
-  end
-  #--------------------------------------------------------------------------
-  # ● 获取伤害文本ID
-  #--------------------------------------------------------------------------
-  def damage_index(damage)
-    case damage
-    when 0...10
-      return 0
-    when 10...20
-      return 1
-    when 20...40
-      return 2
-    when 40...80
-      return 3
-    when 80...120
-      return 4
-    when 120...160
-      return 5
-    when 160...240
-      return 6
-    else
-      return 7
+      # 获取待使用法术ID
+      id = combo[@combo_id]
+      result = user.skill_can_use?(id,target)
+      # 可以使用的情况
+      if result[0]
+        # 开始使用绝招
+        use_skill(user,id)
+        @combo_id += 1
+      else
+        # 显示错误文本
+        show_text(result[1])
+        @using_flag = false
+        @phase3_step = [1,n_phase]
+        return
+      end
     end
   end
   #--------------------------------------------------------------------------
-  # ● 获取法术伤害文本ID
+  # ● 刷新画面 (连续文本)
   #--------------------------------------------------------------------------
-  def magic_index(damage)
-    case damage
-    when 0...10
-      return 0
-    when 10...20
-      return 1
-    when 20...40
-      return 2
-    when 40...80
-      return 3
-    when 80...160
-      return 4
-    else
-      return 5
+  def update_phase3_text(n_phase,combo,target)
+    # 根据下回合设置使用者
+    case n_phase
+    when 1
+      user = @enemy
+    when 2
+      user = @actor
     end
-  end
-  #--------------------------------------------------------------------------
-  # ● 获取HP状态文本ID
-  #--------------------------------------------------------------------------
-  def hp_index(percent)
-    case percent
-    when 100
-      return 0
-    when 95...100
-      return 1
-    when 90...95
-      return 2
-    when 80...90
-      return 3
-    when 60...80
-      return 4
-    when 40...60
-      return 5
-    when 30...40
-      return 6
-    when 20...30
-      return 7
-    when 10...20
-      return 8
-    when 5...10
-      return 9
-    when 0...5
-      return 10
+    # 如果下一文本为空则进入下一回合
+    if combo[@text_id] == nil
+      @phase3_step = [1,n_phase]
+      @phase3_step = [3,n_phase,@id_gp] if @using_flag
+    else
+      # 当前文本为damage
+      if combo[@text_id][0,6] == "damage"
+        n_text = combo[@text_id].dup.gsub!("damage","")
+        # 目标结算伤害
+        target.hp = [target.hp-user.damage,0].max
+        @msg_window.auto_text(n_text)
+        @msg_window.visible = true
+        # 播放击中动画
+        target.animation_id = 1
+        target.animation_hit = true
+        @wait_count = 18
+      else
+        show_text(combo[@text_id])
+      end
+      @text_id += 1
     end
   end
   #--------------------------------------------------------------------------
@@ -520,6 +454,75 @@ class Scene_Battle
       end
       text = $game_task.give_tan_reward
       @msg_window.auto_text(text)
+    end
+  end
+  #--------------------------------------------------------------------------
+  # ● 显示铸剑战斗对话
+  #--------------------------------------------------------------------------
+  def show_sword_battle
+    # 显示对话并获得武器
+    @msg_window.auto_text($data_text.sword_battle[@sword_step].deep_clone)
+    @msg_window.visible = true
+    @actor.gain_item(2,$data_tasks.sword_weapon[@sword_step])
+    @sword_talk = 1
+  end
+  #--------------------------------------------------------------------------
+  # ● 显示铸剑战斗通过对话
+  #--------------------------------------------------------------------------
+  def show_sword_pass
+    # 显示对话并设置铸剑挑战标志
+    @msg_window.auto_text($data_text.sword_pass.dup)
+    @msg_window.visible = true
+    @actor.sword_battle = true
+    @sword_talk = 2
+  end
+  #--------------------------------------------------------------------------
+  # ● 移除铸剑挑战武器
+  #--------------------------------------------------------------------------
+  def remove_sword_weapon
+    # 移除铸剑挑战武器，设置玩家为空手
+    bag_id = @actor.get_item_index(2,$data_tasks.sword_weapon[@sword_step],1)
+    @actor.lose_bag_id(bag_id)
+    @actor.weapon_id = 0
+  end
+  #--------------------------------------------------------------------------
+  # ● 刷新铸剑挑战
+  #--------------------------------------------------------------------------
+  def update_phase6
+    # 按下 B 键的情况或按下 C 键的情况
+    if Input.trigger?(Input::B) or Input.trigger?(Input::C)
+      case @sword_talk
+      when 0 # 判定是否挑战通过
+        if @sword_step < 4
+          show_sword_battle
+        else
+          show_sword_pass
+        end
+      when 1 # 转入战斗
+        start_battle
+      when 2 # 进入铸剑谷
+        # 还原为战斗开始前的 BGM
+        $game_system.bgm_play($game_temp.map_bgm)
+        # 清除战斗中标志
+        $game_temp.in_battle = false
+        # 清除临时数据
+        @actor.clear_temp_data
+        @enemy.clear_temp_data
+        # 播放移动SE
+        $game_system.se_play($data_system.move_se)
+        $scene = Scene_Map.new
+        # 设置主角的移动目标
+        $game_map.setup(67)
+        $game_player.moveto(9,11)
+        $game_player.turn_up
+        $game_player.straighten
+        $game_map.autoplay
+        # 准备过渡
+        Graphics.freeze
+        # 设置过渡处理中标志
+        $game_temp.transition_processing = true
+        $game_temp.transition_name = ""
+      end
     end
   end
 end

@@ -239,6 +239,55 @@ class Scene_Battle
     end
   end
   #--------------------------------------------------------------------------
+  # ● 描绘文本
+  #--------------------------------------------------------------------------
+  def show_text(text,time=40)
+    @msg_window.auto_text(text.dup)
+    @msg_window.visible = true
+    for i in 0..time
+      # 刷新画面
+      Graphics.update
+    end
+    @msg_window.visible=false
+  end
+  #--------------------------------------------------------------------------
+  # ● 逃跑
+  #--------------------------------------------------------------------------
+  def escape
+    # 开启作弊的情况
+    if $game_temp.cheat_mode
+      @enemy.hp = 0
+      judge
+      return
+    end
+    # 计算逃跑系数
+    escape_num = rand(@actor.agi+@escape_factor)
+    # BOSS战斗系数强制归零
+    escape_num = 0 if $game_temp.boss_battle
+    # 系数≥敌人敏捷逃跑成功
+    if escape_num >= @enemy.agi
+      show_text($data_text.run_suc_text)
+      $game_system.se_play($data_system.escape_se)
+      # 还原为战斗开始前的 BGM
+      $game_system.bgm_play($game_temp.map_bgm)
+      # 清除战斗中标志
+      $game_temp.in_battle = false
+      # 清除临时数据
+      @actor.clear_temp_data
+      @enemy.clear_temp_data
+      # 回到地图画面
+      $scene = Scene_Map.new
+    else # 逃跑失败
+      @escape_factor += 10
+      text = $data_text.run_fail_text[1].deep_clone
+      text.gsub!("user","你")
+      text.gsub!("target",@enemy.name)
+      show_text(text)
+      # 开始敌方行动
+      start_phase2
+    end
+  end
+  #--------------------------------------------------------------------------
   # ● 玩家回合
   #--------------------------------------------------------------------------
   def start_phase1(menu_id = 0)
@@ -412,55 +461,6 @@ class Scene_Battle
     @type_window.dispose
     @type_window = nil
     return_main_menu(3)
-  end
-  #--------------------------------------------------------------------------
-  # ● 描绘文本
-  #--------------------------------------------------------------------------
-  def show_text(text,time=40)
-    @msg_window.auto_text(text.dup)
-    @msg_window.visible = true
-    for i in 0..time
-      # 刷新画面
-      Graphics.update
-    end
-    @msg_window.visible=false
-  end
-  #--------------------------------------------------------------------------
-  # ● 逃跑
-  #--------------------------------------------------------------------------
-  def escape
-    # 开启作弊的情况
-    if $game_temp.cheat_mode
-      @enemy.hp = 0
-      judge
-      return
-    end
-    # 计算逃跑系数
-    escape_num = rand(@actor.agi+@escape_factor)
-    # BOSS战斗系数强制归零
-    escape_num = 0 if $game_temp.boss_battle
-    # 系数≥敌人敏捷逃跑成功
-    if escape_num >= @enemy.agi
-      show_text($data_text.run_suc_text)
-      $game_system.se_play($data_system.escape_se)
-      # 还原为战斗开始前的 BGM
-      $game_system.bgm_play($game_temp.map_bgm)
-      # 清除战斗中标志
-      $game_temp.in_battle = false
-      # 清除临时数据
-      @actor.clear_temp_data
-      @enemy.clear_temp_data
-      # 回到地图画面
-      $scene = Scene_Map.new
-    else # 逃跑失败
-      @escape_factor += 10
-      text = $data_text.run_fail_text[1].deep_clone
-      text.gsub!("user","你")
-      text.gsub!("target",@enemy.name)
-      show_text(text)
-      # 开始敌方行动
-      start_phase2
-    end
   end
   #--------------------------------------------------------------------------
   # ● 隐藏命令选项
